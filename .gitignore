@@ -1,0 +1,141 @@
+# ==========================================================
+# Flutter
+# ==========================================================
+
+.dart_tool/
+.packages
+.pub/
+build/
+
+# Flutter/Dart generated
+.flutter-plugins
+.flutter-plugins-dependencies
+.generated/
+.metadata
+
+# Android
+android/.gradle/
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/local.properties
+android/key.properties
+
+# iOS
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Pods/
+ios/.symlinks/
+
+# macOS
+macos/Flutter/ephemeral/
+
+# Linux
+linux/flutter/ephemeral/
+
+# Windows
+windows/flutter/ephemeral/
+
+# Web
+build/web/
+
+# ==========================================================
+# Spring Boot
+# ==========================================================
+
+target/
+out/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+
+# IntelliJ
+.idea/
+*.iml
+
+# ==========================================================
+# Environment Files
+# ==========================================================
+
+.env
+.env.*
+application-local.yml
+application-local.properties
+
+# ==========================================================
+# VS Code
+# ==========================================================
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# ==========================================================
+# OS Files
+# ==========================================================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==========================================================
+# Logs
+# ==========================================================
+
+logs/
+*.log
+
+# ==========================================================
+# MongoDB (if local)
+# ==========================================================
+
+data/
+dump/
+
+# ==========================================================
+# Coverage
+# ==========================================================
+
+coverage/
+lcov.info
+
+# ==========================================================
+# Firebase (optional)
+# ==========================================================
+
+firebase-debug.log
+firebase-debug.*
+.firestore/
+
+# ==========================================================
+# Secrets
+# ==========================================================
+
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+*.crt
+
+# ==========================================================
+# Misc
+# ==========================================================
+
+*.tmp
+*.bak
+*.swp
+*.orig

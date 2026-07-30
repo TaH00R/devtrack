@@ -1,8 +1,8 @@
-import 'package:devtrack/models/achievement.dart';
-import 'package:devtrack/models/goal.dart';
-import 'package:devtrack/models/note.dart';
-import 'package:devtrack/models/project.dart';
-import 'package:devtrack/models/user.dart';
+import 'package:devtrack/shared/models/achievement.dart';
+import 'package:devtrack/shared/models/goal.dart';
+import 'package:devtrack/shared/models/note.dart';
+import 'package:devtrack/shared/models/project.dart';
+import 'package:devtrack/shared/models/user.dart';
 
 class DashboardData {
   final User user;

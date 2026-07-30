@@ -17,7 +17,34 @@ class StartScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 5),
-              Image.asset("assets/images/cat_watching_rain.png"),
+              SizedBox(
+                height: 220,
+                width: double.infinity,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Image.asset(
+                        "assets/images/cat_watching_rain.png",
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+
+                    Positioned(
+                      top: 3,
+                      left: 15,
+                      child: GestureDetector(
+                        onTap: () {
+                          // Open Dashboard
+                        },
+                        child: Image.asset(
+                          "assets/images/appbar.png",
+                          width: 50,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 18),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 22),
@@ -44,7 +71,7 @@ class StartScreen extends StatelessWidget {
                           "assets/images/smile_pixel.png",
                           width: 40,
                           height: 40,
-                        )
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -73,9 +100,17 @@ class StartScreen extends StatelessWidget {
                       trailing: "2 / 3 completed",
                       child: Column(
                         children: [
-                          Task(text: "Solve 2 LeetCode Problems", done: true, tag: "Daily"),
+                          Task(
+                            text: "Solve 2 LeetCode Problems",
+                            done: true,
+                            tag: "Daily",
+                          ),
                           Divider(color: Colors.white10),
-                          Task(text: "Push Code to GitHub", done: true, tag: "Daily"),
+                          Task(
+                            text: "Push Code to GitHub",
+                            done: true,
+                            tag: "Daily",
+                          ),
                           Divider(color: Colors.white10),
                           Task(
                             text: "Study Spring Boot Security",
@@ -199,9 +234,5 @@ class StartScreen extends StatelessWidget {
         ),
       ),
     );
-  }}
-
-  
-
-
-
+  }
+}

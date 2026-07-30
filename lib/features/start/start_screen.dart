@@ -1,7 +1,6 @@
 import 'package:devtrack/features/start/widgets/card.dart';
 import 'package:devtrack/features/start/widgets/note.dart';
 import 'package:devtrack/features/start/widgets/task.dart';
-import 'package:devtrack/shared/widgets/bottom_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -198,12 +197,6 @@ class StartScreen extends StatelessWidget {
             ],
           ),
         ),
-        bottomNavigationBar: DevTrackNavBar(
-          currentIndex: 0,
-          onTap: (index) {
-            // Handle navigation
-          },
-        )
       ),
     );
   }}

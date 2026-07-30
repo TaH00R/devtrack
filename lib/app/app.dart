@@ -1,4 +1,4 @@
-import 'package:devtrack/features/start/start_screen.dart';
+import 'package:devtrack/features/homepage/homepage.dart';
 import 'package:flutter/material.dart';
 
 class MyApp extends StatelessWidget {
@@ -9,7 +9,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      home: const StartScreen(),
+      home: const HomeScreen(),
     );
   }
 }

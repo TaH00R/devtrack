@@ -1,3 +1,4 @@
+import 'package:devtrack/features/dashboard/dashboard_screen.dart';
 import 'package:devtrack/features/start/start_screen.dart';
 import 'package:devtrack/shared/widgets/bottom_navbar.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
     index: selectedIndex,
     children: const [
       StartScreen(),
+      DashboardScreen(),
     ],
   ),
   bottomNavigationBar: DevTrackNavBar(

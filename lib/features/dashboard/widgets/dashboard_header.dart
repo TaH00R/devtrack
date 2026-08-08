@@ -9,27 +9,15 @@ class DashboardHeader extends StatelessWidget {
     return Row(
       children: [
 
-        Container(
-          width: 62,
-          height: 62,
-          decoration: BoxDecoration(
-            color: const Color(0xff1B1C20),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: Colors.white10,
+  Center(
+            child: Hero(
+  tag: "dashboard_logo",
+  child: Image.asset(
+    "assets/images/appbar.png",
+    width: 50,
+  ),
+),
             ),
-          ),
-          child: const Center(
-            child: Text(
-              "</>",
-              style: TextStyle(
-                color: Color(0xffA970FF),
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
 
         const SizedBox(width: 18),
 

@@ -1,3 +1,4 @@
+import 'package:devtrack/features/dashboard/dashboard_screen.dart';
 import 'package:devtrack/features/start/widgets/card.dart';
 import 'package:devtrack/features/start/widgets/note.dart';
 import 'package:devtrack/features/start/widgets/task.dart';
@@ -34,12 +35,15 @@ class StartScreen extends StatelessWidget {
                       left: 15,
                       child: GestureDetector(
                         onTap: () {
-                          // Open Dashboard
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const DashboardScreen()));
                         },
-                        child: Image.asset(
-                          "assets/images/appbar.png",
-                          width: 50,
-                        ),
+                        child: Hero(
+  tag: "dashboard_logo",
+  child: Image.asset(
+    "assets/images/appbar.png",
+    width: 50,
+  ),
+),
                       ),
                     ),
                   ],

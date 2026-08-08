@@ -1,8 +1,10 @@
 package com.devtrack.backend.services.impl;
 
 import com.devtrack.backend.entities.User;
+import com.devtrack.backend.models.DevtrackApiException;
 import com.devtrack.backend.repos.UserRepository;
 import com.devtrack.backend.services.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +26,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new DevtrackApiException(HttpStatus.BAD_REQUEST, "User not found"));
     }
 
     @Override

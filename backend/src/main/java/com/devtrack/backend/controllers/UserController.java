@@ -21,6 +21,14 @@ public class UserController {
         return userService.createUser(user);
     }
 
+    @PatchMapping("/{id}/display-name")
+    public User updateDisplayName(
+            @PathVariable Long id,
+            @RequestBody User user
+    ) {
+        return userService.updateDisplayName(id, user.getDisplayName());
+    }
+
     @GetMapping("/{id}")
     public User getUser(@PathVariable Long id) {
         return userService.getUserById(id);

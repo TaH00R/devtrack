@@ -30,6 +30,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User updateDisplayName(Long id, String displayName) {
+
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new DevtrackApiException(HttpStatus.BAD_REQUEST,"User not found"));
+
+        existingUser.setDisplayName(displayName);
+        return userRepository.save(existingUser);
+    }
+
+    @Override
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }

@@ -25,7 +25,7 @@ public class GithubProfileServiceImpl implements GithubProfileService {
     @Override
     public GithubProfile getGithubProfileById(Long id) {
         return githubProfileRepository.findById(id).
-                orElseThrow(()->new DevtrackApiException(HttpStatus.BAD_REQUEST, "Profile Not Found"));
+                orElseThrow(()->new DevtrackApiException(HttpStatus.BAD_REQUEST, "Github Profile Not Found"));
     }
 
     @Override

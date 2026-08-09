@@ -29,6 +29,8 @@ public class LeetcodeProfile {
 
     private Integer hardSolved;
 
+    private Integer contestRatings;
+
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;

@@ -1,7 +1,8 @@
 package com.devtrack.backend.controllers;
 
 
-import com.devtrack.backend.entities.Project;
+import com.devtrack.backend.dto.ProjectRequestDTO;
+import com.devtrack.backend.dto.ProjectResponseDTO;
 import com.devtrack.backend.services.ProjectService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,23 +18,25 @@ public class ProjectController {
     }
 
     @PostMapping
-    public Project createProject(@RequestBody Project project) {
-        return projectService.createProject(project);
+    public ProjectResponseDTO createProject(
+            @RequestBody ProjectRequestDTO projectRequestDTO
+    ) {
+        return projectService.createProject(projectRequestDTO);
     }
     
     @GetMapping("/{id}")
-    public  Project getProject(@PathVariable Long id) {
+    public  ProjectResponseDTO getProject(@PathVariable Long id) {
         return  projectService.getProjectById(id);
     }
 
     @GetMapping
-    public List<Project> getAllProjects() {
+    public List<ProjectResponseDTO> getAllProjects() {
         return projectService.getAllProjects();
     }
 
     @PatchMapping("/{id}")
-    public  Project updateProject(@PathVariable Long id, @RequestBody Project project) {
-        return  projectService.updateProject(id, project);
+    public  ProjectResponseDTO updateProject(@PathVariable Long id, @RequestBody ProjectRequestDTO projectRequestDTO) {
+        return  projectService.updateProject(id, projectRequestDTO);
     }
 
     @DeleteMapping("/{id}")

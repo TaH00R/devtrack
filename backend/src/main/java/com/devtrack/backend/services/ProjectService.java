@@ -1,17 +1,19 @@
 package com.devtrack.backend.services;
 
+import com.devtrack.backend.dto.ProjectRequestDTO;
+import com.devtrack.backend.dto.ProjectResponseDTO;
 import com.devtrack.backend.entities.Project;
 
 import java.util.List;
 
 public interface ProjectService {
-    Project createProject(Project project);
+    ProjectResponseDTO createProject(ProjectRequestDTO projectRequestDTO);
 
-    Project getProjectById(Long id);
+    ProjectResponseDTO getProjectById(Long id);
 
-    List<Project> getAllProjects();
+    List<ProjectResponseDTO> getAllProjects();
 
-    Project updateProject(Long id, Project project);
+    ProjectResponseDTO updateProject(Long id, ProjectRequestDTO projectRequestDTO);
 
     void deleteProject(Long id);
 

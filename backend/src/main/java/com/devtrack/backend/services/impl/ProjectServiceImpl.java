@@ -2,69 +2,137 @@ package com.devtrack.backend.services.impl;
 
 import com.devtrack.backend.dto.ProjectRequestDTO;
 import com.devtrack.backend.dto.ProjectResponseDTO;
-import com.devtrack.backend.dto.TaskResponseDTO;
 import com.devtrack.backend.entities.Project;
-import com.devtrack.backend.entities.Tag;
-import com.devtrack.backend.entities.Task;
+import com.devtrack.backend.entities.User;
 import com.devtrack.backend.models.DevtrackApiException;
 import com.devtrack.backend.repos.ProjectRepository;
+import com.devtrack.backend.repos.UserRepository;
 import com.devtrack.backend.services.ProjectService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
-    private final ProjectRepository projectRepository;
 
-    public ProjectServiceImpl(ProjectRepository projectRepository) {
+    private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
+
+    public ProjectServiceImpl(
+            ProjectRepository projectRepository,
+            UserRepository userRepository
+    ) {
         this.projectRepository = projectRepository;
+        this.userRepository = userRepository;
     }
 
-    //conversion function
     private ProjectResponseDTO convertToResponseDTO(Project project) {
 
-        return new TaskResponseDTO(
+        return new ProjectResponseDTO(
                 project.getId(),
+                project.getName(),
                 project.getDescription(),
                 project.getGithubUrl(),
-                project.getName(),
+                project.getUser().getId()
         );
     }
 
     @Override
-    public ProjectResponseDTO createProject(ProjectRequestDTO projectRequestDTO) {
-        return projectRepository.save(project);
+    public ProjectResponseDTO createProject(
+            ProjectRequestDTO projectRequestDTO
+    ) {
+
+        Project project = new Project();
+
+        project.setName(projectRequestDTO.getName());
+        project.setDescription(projectRequestDTO.getDescription());
+        project.setGithubUrl(projectRequestDTO.getGithubUrl());
+
+        User user = userRepository.findById(
+                projectRequestDTO.getUserId()
+        ).orElseThrow(() ->
+                new DevtrackApiException(
+                        HttpStatus.BAD_REQUEST,
+                        "User not found"
+                )
+        );
+
+        project.setUser(user);
+
+        Project savedProject = projectRepository.save(project);
+
+        return convertToResponseDTO(savedProject);
     }
 
     @Override
     public ProjectResponseDTO getProjectById(Long id) {
-        return projectRepository.findById(id)
-                .orElseThrow(()-> new DevtrackApiException(HttpStatus.BAD_REQUEST, "Project not found"));
+
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() ->
+                        new DevtrackApiException(
+                                HttpStatus.BAD_REQUEST,
+                                "Project not found"
+                        )
+                );
+
+        return convertToResponseDTO(project);
     }
 
     @Override
     public List<ProjectResponseDTO> getAllProjects() {
-        return projectRepository.findAll();
+
+        return projectRepository.findAll()
+                .stream()
+                .map(this::convertToResponseDTO)
+                .toList();
     }
 
     @Override
-    public ProjectResponseDTO updateProject(Long id, ProjectRequestDTO projectRequestDTO) {
+    public ProjectResponseDTO updateProject(
+            Long id,
+            ProjectRequestDTO projectRequestDTO
+    ) {
+
         Project existingProject = projectRepository.findById(id)
-                .orElseThrow(()-> new DevtrackApiException(HttpStatus.BAD_REQUEST, "Project not found"));
+                .orElseThrow(() ->
+                        new DevtrackApiException(
+                                HttpStatus.BAD_REQUEST,
+                                "Project not found"
+                        )
+                );
 
-        existingProject.setName(project.getName());
-        existingProject.setDescription(project.getDescription());
-        existingProject.setGithubUrl(project.getGithubUrl());
+        existingProject.setName(projectRequestDTO.getName());
+        existingProject.setDescription(projectRequestDTO.getDescription());
+        existingProject.setGithubUrl(projectRequestDTO.getGithubUrl());
 
-        return projectRepository.save(existingProject);
+        User user = userRepository.findById(
+                projectRequestDTO.getUserId()
+        ).orElseThrow(() ->
+                new DevtrackApiException(
+                        HttpStatus.BAD_REQUEST,
+                        "User not found"
+                )
+        );
+
+        existingProject.setUser(user);
+
+        Project updatedProject = projectRepository.save(existingProject);
+
+        return convertToResponseDTO(updatedProject);
     }
 
     @Override
     public void deleteProject(Long id) {
-        projectRepository.deleteById(id);
+
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() ->
+                        new DevtrackApiException(
+                                HttpStatus.BAD_REQUEST,
+                                "Project not found"
+                        )
+                );
+
+        projectRepository.delete(project);
     }
 }

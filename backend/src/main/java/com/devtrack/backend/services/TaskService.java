@@ -1,17 +1,19 @@
 package com.devtrack.backend.services;
 
+import com.devtrack.backend.dto.TaskRequestDTO;
+import com.devtrack.backend.dto.TaskResponseDTO;
 import com.devtrack.backend.entities.Task;
 
 import java.util.List;
 
 public interface TaskService {
-    Task createTask(Task task);
+    TaskResponseDTO createTask(TaskRequestDTO taskRequestDTO);
 
-    Task getTaskById(Long id);
+    TaskResponseDTO getTaskById(Long id);
 
-    List<Task> getAllTasks();
+    List<TaskResponseDTO> getAllTasks();
 
-    Task updateTask(Long id, Task task);
+    TaskResponseDTO updateTask(Long id, TaskRequestDTO taskRequestDTO);
 
     void deleteTask(Long id);
 }

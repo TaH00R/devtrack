@@ -1,6 +1,7 @@
 package com.devtrack.backend.controllers;
 
-import com.devtrack.backend.entities.Task;
+import com.devtrack.backend.dto.TaskRequestDTO;
+import com.devtrack.backend.dto.TaskResponseDTO;
 import com.devtrack.backend.services.TaskService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,23 +18,29 @@ public class TaskController {
     }
 
     @PostMapping
-    public Task createTask(@RequestBody Task task) {
-        return  taskService.createTask(task);
+    public TaskResponseDTO createTask(
+            @RequestBody TaskRequestDTO taskRequestDTO
+    ) {
+        return  taskService.createTask(taskRequestDTO);
     }
 
     @GetMapping("/{id}")
-    public  Task getTaskById(@PathVariable Long id) {
+    public  TaskResponseDTO getTaskById(
+            @PathVariable Long id
+    ) {
         return  taskService.getTaskById(id);
     }
 
     @GetMapping
-    public List<Task> getAllTasks() {
+    public List<TaskResponseDTO> getAllTasks() {
         return  taskService.getAllTasks();
     }
 
     @PatchMapping("/{id}")
-    public  Task updateTask(@PathVariable Long id, @RequestBody Task task) {
-        return   taskService.updateTask(id, task);
+    public  TaskResponseDTO updateTask(
+            @PathVariable Long id, @RequestBody TaskRequestDTO taskRequestDTO
+    ) {
+        return   taskService.updateTask(id, taskRequestDTO);
     }
 
     @DeleteMapping("/{id}")

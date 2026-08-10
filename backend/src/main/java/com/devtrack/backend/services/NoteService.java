@@ -1,17 +1,19 @@
 package com.devtrack.backend.services;
 
+import com.devtrack.backend.dto.NoteRequestDTO;
+import com.devtrack.backend.dto.NoteResponseDTO;
 import com.devtrack.backend.entities.Note;
 
 import java.util.List;
 
 public interface NoteService {
-    Note createNote(Note note);
+    NoteResponseDTO createNote(NoteRequestDTO noteRequestDTO);
 
-    Note getNoteById(Long id);
+    NoteResponseDTO getNoteById(Long id);
 
-    List<Note> getAllNotes();
+    List<NoteResponseDTO> getAllNotes();
 
-    Note updateNote(Long id, Note note);
+    NoteResponseDTO updateNote(Long id, NoteRequestDTO noteRequestDTO);
 
     void deleteNote(Long id);
 }

@@ -1,6 +1,7 @@
 package com.devtrack.backend.controllers;
 
-import com.devtrack.backend.entities.Note;
+import com.devtrack.backend.dto.NoteRequestDTO;
+import com.devtrack.backend.dto.NoteResponseDTO;
 import com.devtrack.backend.services.NoteService;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,23 +17,23 @@ public class NoteController {
     }
 
     @PostMapping
-    public Note createNote(@RequestBody Note note) {
-        return  noteService.createNote(note);
+    public NoteResponseDTO createNote(@RequestBody NoteRequestDTO noteRequestDTO) {
+        return  noteService.createNote(noteRequestDTO);
     };
 
     @GetMapping
-    public List<Note> getAllNotes() {
+    public List<NoteResponseDTO> getAllNotes() {
         return  noteService.getAllNotes();
     }
 
     @GetMapping("/{id}")
-    public  Note getNoteById(@PathVariable Long id) {
+    public  NoteResponseDTO getNoteById(@PathVariable Long id) {
         return   noteService.getNoteById(id);
     }
 
     @PatchMapping("/{id}")
-    public  Note updateNote(@PathVariable Long id, @RequestBody Note note) {
-        return   noteService.updateNote(id, note);
+    public  NoteResponseDTO updateNote(@PathVariable Long id, @RequestBody NoteRequestDTO noteRequestDTO) {
+        return   noteService.updateNote(id, noteRequestDTO);
     }
 
     @DeleteMapping("/{id}")

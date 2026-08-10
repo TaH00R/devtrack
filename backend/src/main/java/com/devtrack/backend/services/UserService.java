@@ -1,18 +1,19 @@
 package com.devtrack.backend.services;
 
-import com.devtrack.backend.entities.User;
+import com.devtrack.backend.dto.UserRequestDTO;
+import com.devtrack.backend.dto.UserResponseDTO;
 
 import java.util.List;
 
 public interface UserService {
 
-    User createUser(User user);
+    UserResponseDTO createUser(UserRequestDTO userRequestDTO);
 
-    User getUserById(Long id);
+    UserResponseDTO getUserById(Long id);
 
-    User updateDisplayName(Long id, String displayName);
+    List<UserResponseDTO> getAllUsers();
 
-    List<User> getAllUsers();
+    UserResponseDTO updateUser(Long id, UserRequestDTO userRequestDTO);
 
     void deleteUser(Long id);
 }

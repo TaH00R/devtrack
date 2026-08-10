@@ -1,10 +1,10 @@
 package com.devtrack.backend.services.impl;
 
+import com.devtrack.backend.dto.UserRequestDTO;
+import com.devtrack.backend.dto.UserResponseDTO;
 import com.devtrack.backend.entities.User;
-import com.devtrack.backend.models.DevtrackApiException;
 import com.devtrack.backend.repos.UserRepository;
 import com.devtrack.backend.services.UserService;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,33 +19,73 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
+
+        User user = new User();
+
+        user.setUserName(userRequestDTO.getUserName());
+        user.setEmail(userRequestDTO.getEmail());
+        user.setPassword(userRequestDTO.getPassword());
+        user.setDisplayName(userRequestDTO.getDisplayName());
+
+        User savedUser = userRepository.save(user);
+
+        return convertToResponseDTO(savedUser);
     }
 
     @Override
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new DevtrackApiException(HttpStatus.BAD_REQUEST, "User not found"));
+    public UserResponseDTO getUserById(Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return convertToResponseDTO(user);
     }
 
     @Override
-    public User updateDisplayName(Long id, String displayName) {
+    public List<UserResponseDTO> getAllUsers() {
 
-        User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new DevtrackApiException(HttpStatus.BAD_REQUEST,"User not found"));
-
-        existingUser.setDisplayName(displayName);
-        return userRepository.save(existingUser);
+        return userRepository.findAll()
+                .stream()
+                .map(this::convertToResponseDTO)
+                .toList();
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public UserResponseDTO updateUser(
+            Long id,
+            UserRequestDTO userRequestDTO
+    ) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setUserName(userRequestDTO.getUserName());
+        user.setEmail(userRequestDTO.getEmail());
+        user.setPassword(userRequestDTO.getPassword());
+        user.setDisplayName(userRequestDTO.getDisplayName());
+
+        User updatedUser = userRepository.save(user);
+
+        return convertToResponseDTO(updatedUser);
     }
 
     @Override
     public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        userRepository.delete(user);
+    }
+
+    private UserResponseDTO convertToResponseDTO(User user) {
+
+        return new UserResponseDTO(
+                user.getId(),
+                user.getUserName(),
+                user.getEmail(),
+                user.getDisplayName()
+        );
     }
 }

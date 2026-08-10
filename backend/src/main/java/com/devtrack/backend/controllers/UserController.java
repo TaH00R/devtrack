@@ -1,6 +1,7 @@
 package com.devtrack.backend.controllers;
 
-import com.devtrack.backend.entities.User;
+import com.devtrack.backend.dto.UserRequestDTO;
+import com.devtrack.backend.dto.UserResponseDTO;
 import com.devtrack.backend.services.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,30 +18,36 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
-    }
-
-    @PatchMapping("/{id}/display-name")
-    public User updateDisplayName(
-            @PathVariable Long id,
-            @RequestBody User user
+    public UserResponseDTO createUser(
+            @RequestBody UserRequestDTO userRequestDTO
     ) {
-        return userService.updateDisplayName(id, user.getDisplayName());
+        return userService.createUser(userRequestDTO);
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
+    public UserResponseDTO getUserById(
+            @PathVariable Long id
+    ) {
         return userService.getUserById(id);
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<UserResponseDTO> getAllUsers() {
         return userService.getAllUsers();
     }
 
+    @PutMapping("/{id}")
+    public UserResponseDTO updateUser(
+            @PathVariable Long id,
+            @RequestBody UserRequestDTO userRequestDTO
+    ) {
+        return userService.updateUser(id, userRequestDTO);
+    }
+
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
+    public void deleteUser(
+            @PathVariable Long id
+    ) {
         userService.deleteUser(id);
     }
 }

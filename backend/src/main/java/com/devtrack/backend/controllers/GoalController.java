@@ -1,6 +1,8 @@
 package com.devtrack.backend.controllers;
 
 
+import com.devtrack.backend.dto.GoalRequestDTO;
+import com.devtrack.backend.dto.GoalResponseDTO;
 import com.devtrack.backend.entities.Goal;
 import com.devtrack.backend.services.GoalService;
 import org.springframework.web.bind.annotation.*;
@@ -17,23 +19,23 @@ public class GoalController {
     }
 
     @PostMapping
-    public Goal createGoal(@RequestBody Goal goal) {
-        return  goalService.createGoal(goal);
+    public GoalResponseDTO createGoal(@RequestBody GoalRequestDTO goalRequestDTO) {
+        return  goalService.createGoal(goalRequestDTO);
     }
 
     @GetMapping
-    public List<Goal> getAllGoals() {
+    public List<GoalResponseDTO> getAllGoals() {
         return  goalService.getAllGoals();
     }
 
     @GetMapping("/{id}")
-    public  Goal getGoalById(@PathVariable Long id) {
+    public  GoalResponseDTO getGoalById(@PathVariable Long id) {
         return   goalService.getGoalById(id);
     }
 
     @PatchMapping("/{id}")
-    public  Goal updateGoal(@PathVariable Long id, @RequestBody Goal goal) {
-        return   goalService.updateGoal(id, goal);
+    public  GoalResponseDTO updateGoal(@PathVariable Long id, @RequestBody GoalRequestDTO goalRequestDTO) {
+        return   goalService.updateGoal(id, goalRequestDTO);
     }
 
     @DeleteMapping("/{id}")

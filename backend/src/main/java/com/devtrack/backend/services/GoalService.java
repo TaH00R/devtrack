@@ -1,17 +1,19 @@
 package com.devtrack.backend.services;
 
+import com.devtrack.backend.dto.GoalRequestDTO;
+import com.devtrack.backend.dto.GoalResponseDTO;
 import com.devtrack.backend.entities.Goal;
 
 import java.util.List;
 
 public interface GoalService {
-    Goal createGoal(Goal goal);
+    GoalResponseDTO createGoal(GoalRequestDTO goalRequestDTO);
 
-    Goal getGoalById(Long id);
+    GoalResponseDTO getGoalById(Long id);
 
-    List<Goal> getAllGoals();
+    List<GoalResponseDTO> getAllGoals();
 
-    Goal updateGoal(Long id, Goal goal);
+    GoalResponseDTO updateGoal(Long id, GoalRequestDTO goalRequestDTO);
 
     void deleteGoal(Long id);
 }

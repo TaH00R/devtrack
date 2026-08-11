@@ -3,6 +3,7 @@ package com.devtrack.backend.controllers;
 import com.devtrack.backend.dto.UserRequestDTO;
 import com.devtrack.backend.dto.UserResponseDTO;
 import com.devtrack.backend.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class UserController {
 
     @PostMapping
     public UserResponseDTO createUser(
-            @RequestBody UserRequestDTO userRequestDTO
+            @Valid @RequestBody UserRequestDTO userRequestDTO
     ) {
         return userService.createUser(userRequestDTO);
     }
@@ -39,7 +40,7 @@ public class UserController {
     @PutMapping("/{id}")
     public UserResponseDTO updateUser(
             @PathVariable Long id,
-            @RequestBody UserRequestDTO userRequestDTO
+            @Valid @RequestBody UserRequestDTO userRequestDTO
     ) {
         return userService.updateUser(id, userRequestDTO);
     }

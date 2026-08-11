@@ -5,6 +5,7 @@ import com.devtrack.backend.dto.GoalRequestDTO;
 import com.devtrack.backend.dto.GoalResponseDTO;
 import com.devtrack.backend.entities.Goal;
 import com.devtrack.backend.services.GoalService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,8 @@ public class GoalController {
     }
 
     @PostMapping
-    public GoalResponseDTO createGoal(@RequestBody GoalRequestDTO goalRequestDTO) {
+    public GoalResponseDTO createGoal(
+            @Valid @RequestBody GoalRequestDTO goalRequestDTO) {
         return  goalService.createGoal(goalRequestDTO);
     }
 
@@ -34,7 +36,9 @@ public class GoalController {
     }
 
     @PatchMapping("/{id}")
-    public  GoalResponseDTO updateGoal(@PathVariable Long id, @RequestBody GoalRequestDTO goalRequestDTO) {
+    public  GoalResponseDTO updateGoal(
+            @PathVariable Long id,
+            @Valid @RequestBody GoalRequestDTO goalRequestDTO) {
         return   goalService.updateGoal(id, goalRequestDTO);
     }
 

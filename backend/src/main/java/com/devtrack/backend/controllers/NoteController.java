@@ -3,6 +3,7 @@ package com.devtrack.backend.controllers;
 import com.devtrack.backend.dto.NoteRequestDTO;
 import com.devtrack.backend.dto.NoteResponseDTO;
 import com.devtrack.backend.services.NoteService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +18,8 @@ public class NoteController {
     }
 
     @PostMapping
-    public NoteResponseDTO createNote(@RequestBody NoteRequestDTO noteRequestDTO) {
+    public NoteResponseDTO createNote(
+            @Valid @RequestBody NoteRequestDTO noteRequestDTO) {
         return  noteService.createNote(noteRequestDTO);
     };
 
@@ -32,7 +34,9 @@ public class NoteController {
     }
 
     @PatchMapping("/{id}")
-    public  NoteResponseDTO updateNote(@PathVariable Long id, @RequestBody NoteRequestDTO noteRequestDTO) {
+    public  NoteResponseDTO updateNote(
+            @PathVariable Long id,
+            @Valid @RequestBody NoteRequestDTO noteRequestDTO) {
         return   noteService.updateNote(id, noteRequestDTO);
     }
 

@@ -3,6 +3,7 @@ package com.devtrack.backend.controllers;
 import com.devtrack.backend.dto.TaskRequestDTO;
 import com.devtrack.backend.dto.TaskResponseDTO;
 import com.devtrack.backend.services.TaskService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class TaskController {
 
     @PostMapping
     public TaskResponseDTO createTask(
-            @RequestBody TaskRequestDTO taskRequestDTO
+           @Valid @RequestBody TaskRequestDTO taskRequestDTO
     ) {
         return  taskService.createTask(taskRequestDTO);
     }
@@ -38,7 +39,8 @@ public class TaskController {
 
     @PatchMapping("/{id}")
     public  TaskResponseDTO updateTask(
-            @PathVariable Long id, @RequestBody TaskRequestDTO taskRequestDTO
+            @PathVariable Long id,
+            @Valid @RequestBody TaskRequestDTO taskRequestDTO
     ) {
         return   taskService.updateTask(id, taskRequestDTO);
     }

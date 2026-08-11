@@ -4,6 +4,7 @@ package com.devtrack.backend.controllers;
 import com.devtrack.backend.dto.ProjectRequestDTO;
 import com.devtrack.backend.dto.ProjectResponseDTO;
 import com.devtrack.backend.services.ProjectService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class ProjectController {
 
     @PostMapping
     public ProjectResponseDTO createProject(
-            @RequestBody ProjectRequestDTO projectRequestDTO
+           @Valid @RequestBody ProjectRequestDTO projectRequestDTO
     ) {
         return projectService.createProject(projectRequestDTO);
     }
@@ -35,7 +36,9 @@ public class ProjectController {
     }
 
     @PatchMapping("/{id}")
-    public  ProjectResponseDTO updateProject(@PathVariable Long id, @RequestBody ProjectRequestDTO projectRequestDTO) {
+    public  ProjectResponseDTO updateProject(
+            @PathVariable Long id,
+            @Valid @RequestBody ProjectRequestDTO projectRequestDTO) {
         return  projectService.updateProject(id, projectRequestDTO);
     }
 

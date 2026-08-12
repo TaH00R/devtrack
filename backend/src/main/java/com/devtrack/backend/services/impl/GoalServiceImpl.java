@@ -6,9 +6,11 @@ import com.devtrack.backend.entities.Goal;
 import com.devtrack.backend.entities.User;
 import com.devtrack.backend.models.DevtrackApiException;
 import com.devtrack.backend.repos.GoalRepository;
-import com.devtrack.backend.repos.UserRepository;
+import com.devtrack.backend.security.CustomUserDetails;
 import com.devtrack.backend.services.GoalService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,14 +19,9 @@ import java.util.List;
 public class GoalServiceImpl implements GoalService {
 
     private final GoalRepository goalRepository;
-    private final UserRepository userRepository;
 
-    public GoalServiceImpl(
-            GoalRepository goalRepository,
-            UserRepository userRepository
-    ) {
+    public GoalServiceImpl(GoalRepository goalRepository) {
         this.goalRepository = goalRepository;
-        this.userRepository = userRepository;
     }
 
     private GoalResponseDTO convertToResponseDTO(Goal goal) {
@@ -39,6 +36,17 @@ public class GoalServiceImpl implements GoalService {
         );
     }
 
+    private User getCurrentUser() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        return userDetails.getUser();
+    }
+
     @Override
     public GoalResponseDTO createGoal(GoalRequestDTO goalRequestDTO) {
 
@@ -49,16 +57,8 @@ public class GoalServiceImpl implements GoalService {
         goal.setCompleted(goalRequestDTO.isCompleted());
         goal.setDeadline(goalRequestDTO.getDeadline());
 
-        User user = userRepository.findById(
-                goalRequestDTO.getUserId()
-        ).orElseThrow(() ->
-                new DevtrackApiException(
-                        HttpStatus.BAD_REQUEST,
-                        "User not found"
-                )
-        );
-
-        goal.setUser(user);
+        User currentUser = getCurrentUser();
+        goal.setUser(currentUser);
 
         Goal savedGoal = goalRepository.save(goal);
 
@@ -76,13 +76,24 @@ public class GoalServiceImpl implements GoalService {
                         )
                 );
 
+        User currentUser = getCurrentUser();
+
+        if (!goal.getUser().getId().equals(currentUser.getId())) {
+            throw new DevtrackApiException(
+                    HttpStatus.FORBIDDEN,
+                    "You do not have access to this goal"
+            );
+        }
+
         return convertToResponseDTO(goal);
     }
 
     @Override
     public List<GoalResponseDTO> getAllGoals() {
 
-        return goalRepository.findAll()
+        User currentUser = getCurrentUser();
+
+        return goalRepository.findAllByUserId(currentUser.getId())
                 .stream()
                 .map(this::convertToResponseDTO)
                 .toList();
@@ -102,21 +113,19 @@ public class GoalServiceImpl implements GoalService {
                         )
                 );
 
+        User currentUser = getCurrentUser();
+
+        if (!existingGoal.getUser().getId().equals(currentUser.getId())) {
+            throw new DevtrackApiException(
+                    HttpStatus.FORBIDDEN,
+                    "You do not have access to this goal"
+            );
+        }
+
         existingGoal.setTitle(goalRequestDTO.getTitle());
         existingGoal.setDescription(goalRequestDTO.getDescription());
         existingGoal.setCompleted(goalRequestDTO.isCompleted());
         existingGoal.setDeadline(goalRequestDTO.getDeadline());
-
-        User user = userRepository.findById(
-                goalRequestDTO.getUserId()
-        ).orElseThrow(() ->
-                new DevtrackApiException(
-                        HttpStatus.BAD_REQUEST,
-                        "User not found"
-                )
-        );
-
-        existingGoal.setUser(user);
 
         Goal updatedGoal = goalRepository.save(existingGoal);
 
@@ -133,6 +142,15 @@ public class GoalServiceImpl implements GoalService {
                                 "Goal Not Found"
                         )
                 );
+
+        User currentUser = getCurrentUser();
+
+        if (!goal.getUser().getId().equals(currentUser.getId())) {
+            throw new DevtrackApiException(
+                    HttpStatus.FORBIDDEN,
+                    "You do not have access to this goal"
+            );
+        }
 
         goalRepository.delete(goal);
     }

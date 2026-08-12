@@ -5,12 +5,16 @@ import com.devtrack.backend.dto.TaskResponseDTO;
 import com.devtrack.backend.entities.Project;
 import com.devtrack.backend.entities.Tag;
 import com.devtrack.backend.entities.Task;
+import com.devtrack.backend.entities.User;
 import com.devtrack.backend.models.DevtrackApiException;
 import com.devtrack.backend.repos.ProjectRepository;
 import com.devtrack.backend.repos.TagRepository;
 import com.devtrack.backend.repos.TaskRepository;
+import com.devtrack.backend.security.CustomUserDetails;
 import com.devtrack.backend.services.TaskService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,7 +38,6 @@ public class TaskServiceImpl implements TaskService {
         this.tagRepository = tagRepository;
     }
 
-    // Entity -> Response DTO
     private TaskResponseDTO convertToResponseDTO(Task task) {
 
         Set<Long> tagIds = task.getTags()
@@ -52,17 +55,38 @@ public class TaskServiceImpl implements TaskService {
         );
     }
 
+    private User getCurrentUser() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        return userDetails.getUser();
+    }
+
+    private void checkProjectOwnership(Project project) {
+
+        User currentUser = getCurrentUser();
+
+        if (!project.getUser().getId().equals(currentUser.getId())) {
+            throw new DevtrackApiException(
+                    HttpStatus.FORBIDDEN,
+                    "You do not have access to this project"
+            );
+        }
+    }
+
     @Override
     public TaskResponseDTO createTask(TaskRequestDTO taskRequestDTO) {
 
         Task task = new Task();
 
-        // Normal fields
         task.setTitle(taskRequestDTO.getTitle());
         task.setDescription(taskRequestDTO.getDescription());
         task.setCompleted(taskRequestDTO.isCompleted());
 
-        // Project relationship
         Project project = projectRepository.findById(
                 taskRequestDTO.getProjectId()
         ).orElseThrow(() ->
@@ -72,9 +96,10 @@ public class TaskServiceImpl implements TaskService {
                 )
         );
 
+        checkProjectOwnership(project);
+
         task.setProject(project);
 
-        // Tag relationships
         Set<Tag> tags = taskRequestDTO.getTagIds()
                 .stream()
                 .map(tagId -> tagRepository.findById(tagId)
@@ -89,10 +114,8 @@ public class TaskServiceImpl implements TaskService {
 
         task.setTags(tags);
 
-        // Save entity
         Task savedTask = taskRepository.save(task);
 
-        // Entity -> Response DTO
         return convertToResponseDTO(savedTask);
     }
 
@@ -107,13 +130,17 @@ public class TaskServiceImpl implements TaskService {
                         )
                 );
 
+        checkProjectOwnership(task.getProject());
+
         return convertToResponseDTO(task);
     }
 
     @Override
     public List<TaskResponseDTO> getAllTasks() {
 
-        return taskRepository.findAll()
+        User currentUser = getCurrentUser();
+
+        return taskRepository.findAllByProjectUserId(currentUser.getId())
                 .stream()
                 .map(this::convertToResponseDTO)
                 .toList();
@@ -133,12 +160,12 @@ public class TaskServiceImpl implements TaskService {
                         )
                 );
 
-        // Normal fields
+        checkProjectOwnership(task.getProject());
+
         task.setTitle(taskRequestDTO.getTitle());
         task.setDescription(taskRequestDTO.getDescription());
         task.setCompleted(taskRequestDTO.isCompleted());
 
-        // Update project
         Project project = projectRepository.findById(
                 taskRequestDTO.getProjectId()
         ).orElseThrow(() ->
@@ -148,9 +175,10 @@ public class TaskServiceImpl implements TaskService {
                 )
         );
 
+        checkProjectOwnership(project);
+
         task.setProject(project);
 
-        // Update tags
         Set<Tag> tags = taskRequestDTO.getTagIds()
                 .stream()
                 .map(tagId -> tagRepository.findById(tagId)
@@ -166,6 +194,7 @@ public class TaskServiceImpl implements TaskService {
         task.setTags(tags);
 
         Task updatedTask = taskRepository.save(task);
+
         return convertToResponseDTO(updatedTask);
     }
 
@@ -179,6 +208,8 @@ public class TaskServiceImpl implements TaskService {
                                 "Task not found"
                         )
                 );
+
+        checkProjectOwnership(task.getProject());
 
         taskRepository.delete(task);
     }

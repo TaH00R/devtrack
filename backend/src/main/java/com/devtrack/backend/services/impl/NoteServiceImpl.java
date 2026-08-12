@@ -7,8 +7,11 @@ import com.devtrack.backend.entities.User;
 import com.devtrack.backend.models.DevtrackApiException;
 import com.devtrack.backend.repos.NoteRepository;
 import com.devtrack.backend.repos.UserRepository;
+import com.devtrack.backend.security.CustomUserDetails;
 import com.devtrack.backend.services.NoteService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,6 +39,17 @@ public class NoteServiceImpl implements NoteService {
         );
     }
 
+    private User getCurrentUser() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        return userDetails.getUser();
+    }
+
     @Override
     public NoteResponseDTO createNote(NoteRequestDTO noteRequestDTO) {
 
@@ -44,16 +58,9 @@ public class NoteServiceImpl implements NoteService {
         note.setTitle(noteRequestDTO.getTitle());
         note.setContent(noteRequestDTO.getContent());
 
-        User user = userRepository.findById(
-                noteRequestDTO.getUserId()
-        ).orElseThrow(() ->
-                new DevtrackApiException(
-                        HttpStatus.BAD_REQUEST,
-                        "User not found"
-                )
-        );
+        User currentUser = getCurrentUser();
 
-        note.setUser(user);
+        note.setUser(currentUser);
 
         Note savedNote = noteRepository.save(note);
 
@@ -71,13 +78,24 @@ public class NoteServiceImpl implements NoteService {
                         )
                 );
 
+        User currentUser = getCurrentUser();
+
+        if (!note.getUser().getId().equals(currentUser.getId())) {
+            throw new DevtrackApiException(
+                    HttpStatus.FORBIDDEN,
+                    "You do not have access to this note"
+            );
+        }
+
         return convertToResponseDTO(note);
     }
 
     @Override
     public List<NoteResponseDTO> getAllNotes() {
 
-        return noteRepository.findAll()
+        User currentUser = getCurrentUser();
+
+        return noteRepository.findAllByUserId(currentUser.getId())
                 .stream()
                 .map(this::convertToResponseDTO)
                 .toList();
@@ -97,19 +115,17 @@ public class NoteServiceImpl implements NoteService {
                         )
                 );
 
+        User currentUser = getCurrentUser();
+
+        if (!existingNote.getUser().getId().equals(currentUser.getId())) {
+            throw new DevtrackApiException(
+                    HttpStatus.FORBIDDEN,
+                    "You do not have access to this note"
+            );
+        }
+
         existingNote.setTitle(noteRequestDTO.getTitle());
         existingNote.setContent(noteRequestDTO.getContent());
-
-        User user = userRepository.findById(
-                noteRequestDTO.getUserId()
-        ).orElseThrow(() ->
-                new DevtrackApiException(
-                        HttpStatus.BAD_REQUEST,
-                        "User not found"
-                )
-        );
-
-        existingNote.setUser(user);
 
         Note updatedNote = noteRepository.save(existingNote);
 
@@ -126,6 +142,15 @@ public class NoteServiceImpl implements NoteService {
                                 "Note Not Found"
                         )
                 );
+
+        User currentUser = getCurrentUser();
+
+        if (!note.getUser().getId().equals(currentUser.getId())) {
+            throw new DevtrackApiException(
+                    HttpStatus.FORBIDDEN,
+                    "You do not have access to this note"
+            );
+        }
 
         noteRepository.delete(note);
     }

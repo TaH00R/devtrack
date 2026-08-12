@@ -6,9 +6,11 @@ import com.devtrack.backend.entities.Project;
 import com.devtrack.backend.entities.User;
 import com.devtrack.backend.models.DevtrackApiException;
 import com.devtrack.backend.repos.ProjectRepository;
-import com.devtrack.backend.repos.UserRepository;
+import com.devtrack.backend.security.CustomUserDetails;
 import com.devtrack.backend.services.ProjectService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,14 +19,9 @@ import java.util.List;
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
-    private final UserRepository userRepository;
 
-    public ProjectServiceImpl(
-            ProjectRepository projectRepository,
-            UserRepository userRepository
-    ) {
+    public ProjectServiceImpl(ProjectRepository projectRepository) {
         this.projectRepository = projectRepository;
-        this.userRepository = userRepository;
     }
 
     private ProjectResponseDTO convertToResponseDTO(Project project) {
@@ -38,6 +35,17 @@ public class ProjectServiceImpl implements ProjectService {
         );
     }
 
+    private User getCurrentUser() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        return userDetails.getUser();
+    }
+
     @Override
     public ProjectResponseDTO createProject(
             ProjectRequestDTO projectRequestDTO
@@ -49,16 +57,9 @@ public class ProjectServiceImpl implements ProjectService {
         project.setDescription(projectRequestDTO.getDescription());
         project.setGithubUrl(projectRequestDTO.getGithubUrl());
 
-        User user = userRepository.findById(
-                projectRequestDTO.getUserId()
-        ).orElseThrow(() ->
-                new DevtrackApiException(
-                        HttpStatus.BAD_REQUEST,
-                        "User not found"
-                )
-        );
+        User currentUser = getCurrentUser();
 
-        project.setUser(user);
+        project.setUser(currentUser);
 
         Project savedProject = projectRepository.save(project);
 
@@ -76,13 +77,24 @@ public class ProjectServiceImpl implements ProjectService {
                         )
                 );
 
+        User currentUser = getCurrentUser();
+
+        if (!project.getUser().getId().equals(currentUser.getId())) {
+            throw new DevtrackApiException(
+                    HttpStatus.FORBIDDEN,
+                    "You do not have access to this project"
+            );
+        }
+
         return convertToResponseDTO(project);
     }
 
     @Override
     public List<ProjectResponseDTO> getAllProjects() {
 
-        return projectRepository.findAll()
+        User currentUser = getCurrentUser();
+
+        return projectRepository.findAllByUserId(currentUser.getId())
                 .stream()
                 .map(this::convertToResponseDTO)
                 .toList();
@@ -102,20 +114,18 @@ public class ProjectServiceImpl implements ProjectService {
                         )
                 );
 
+        User currentUser = getCurrentUser();
+
+        if (!existingProject.getUser().getId().equals(currentUser.getId())) {
+            throw new DevtrackApiException(
+                    HttpStatus.FORBIDDEN,
+                    "You do not have access to this project"
+            );
+        }
+
         existingProject.setName(projectRequestDTO.getName());
         existingProject.setDescription(projectRequestDTO.getDescription());
         existingProject.setGithubUrl(projectRequestDTO.getGithubUrl());
-
-        User user = userRepository.findById(
-                projectRequestDTO.getUserId()
-        ).orElseThrow(() ->
-                new DevtrackApiException(
-                        HttpStatus.BAD_REQUEST,
-                        "User not found"
-                )
-        );
-
-        existingProject.setUser(user);
 
         Project updatedProject = projectRepository.save(existingProject);
 
@@ -132,6 +142,15 @@ public class ProjectServiceImpl implements ProjectService {
                                 "Project not found"
                         )
                 );
+
+        User currentUser = getCurrentUser();
+
+        if (!project.getUser().getId().equals(currentUser.getId())) {
+            throw new DevtrackApiException(
+                    HttpStatus.FORBIDDEN,
+                    "You do not have access to this project"
+            );
+        }
 
         projectRepository.delete(project);
     }

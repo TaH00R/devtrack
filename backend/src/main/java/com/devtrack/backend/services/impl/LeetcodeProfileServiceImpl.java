@@ -29,9 +29,11 @@ public class LeetcodeProfileServiceImpl implements LeetcodeProfileService {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
+        assert authentication != null;
         CustomUserDetails userDetails =
                 (CustomUserDetails) authentication.getPrincipal();
 
+        assert userDetails != null;
         return userDetails.getUser();
     }
 

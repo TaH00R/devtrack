@@ -20,14 +20,11 @@ import java.util.List;
 public class NoteServiceImpl implements NoteService {
 
     private final NoteRepository noteRepository;
-    private final UserRepository userRepository;
 
     public NoteServiceImpl(
-            NoteRepository noteRepository,
-            UserRepository userRepository
+            NoteRepository noteRepository
     ) {
         this.noteRepository = noteRepository;
-        this.userRepository = userRepository;
     }
 
     private NoteResponseDTO convertToResponseDTO(Note note) {
@@ -44,9 +41,11 @@ public class NoteServiceImpl implements NoteService {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
+        assert authentication != null;
         CustomUserDetails userDetails =
                 (CustomUserDetails) authentication.getPrincipal();
 
+        assert userDetails != null;
         return userDetails.getUser();
     }
 

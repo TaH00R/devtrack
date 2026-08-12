@@ -16,53 +16,50 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DevtrackApiException.class)
     public ResponseEntity<ErrorDetails> handleDevtrackApiException(
-            DevtrackApiException exception, WebRequest request
-    ){
+            DevtrackApiException exception,
+            WebRequest request
+    ) {
+
         final ErrorDetails errorDetails = new ErrorDetails();
+
         errorDetails.setErrorCode(exception.getStatus().value());
-        errorDetails.setErrorMessage(exception.getLocalizedMessage());
+        errorDetails.setErrorMessage(exception.getMessage());
         errorDetails.setDevErrorMessage(request.getDescription(false));
         errorDetails.setTimestamp(System.currentTimeMillis());
 
-        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
-
+        return new ResponseEntity<>(
+                errorDetails,
+                exception.getStatus()
+        );
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorDetails> handleAccessDeniedException(
-            DevtrackApiException exception, WebRequest request
-    ){
+            AccessDeniedException exception,
+            WebRequest request
+    ) {
+
         final ErrorDetails errorDetails = new ErrorDetails();
 
-        errorDetails.setErrorMessage(exception.getLocalizedMessage());
+        errorDetails.setErrorCode(HttpStatus.FORBIDDEN.value());
+        errorDetails.setErrorMessage(exception.getMessage());
         errorDetails.setDevErrorMessage(request.getDescription(false));
         errorDetails.setTimestamp(System.currentTimeMillis());
 
-        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
-
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorDetails> handleGlobalException(
-            Exception exception, WebRequest request
-    ){
-        final ErrorDetails errorDetails = new ErrorDetails();
-
-        errorDetails.setErrorMessage(exception.getLocalizedMessage());
-        errorDetails.setDevErrorMessage(request.getDescription(false));
-        errorDetails.setTimestamp(System.currentTimeMillis());
-
-        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
-
+        return new ResponseEntity<>(
+                errorDetails,
+                HttpStatus.FORBIDDEN
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationErrors(
-            MethodArgumentNotValidException ex
+            MethodArgumentNotValidException exception
     ) {
+
         Map<String, String> errors = new HashMap<>();
 
-        ex.getBindingResult()
+        exception.getBindingResult()
                 .getFieldErrors()
                 .forEach(error ->
                         errors.put(
@@ -71,8 +68,29 @@ public class GlobalExceptionHandler {
                         )
                 );
 
-        return ResponseEntity.badRequest().body(errors);
+        return ResponseEntity
+                .badRequest()
+                .body(errors);
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorDetails> handleGlobalException(
+            Exception exception,
+            WebRequest request
+    ) {
 
+        final ErrorDetails errorDetails = new ErrorDetails();
+
+        errorDetails.setErrorCode(
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
+        );
+        errorDetails.setErrorMessage(exception.getMessage());
+        errorDetails.setDevErrorMessage(request.getDescription(false));
+        errorDetails.setTimestamp(System.currentTimeMillis());
+
+        return new ResponseEntity<>(
+                errorDetails,
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
 }

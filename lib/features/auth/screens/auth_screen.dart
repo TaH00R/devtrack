@@ -30,6 +30,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.read<AuthProvider>();
     return Scaffold(
       backgroundColor: const Color(0xff121214),
       body: SafeArea(
@@ -170,30 +171,47 @@ class _AuthScreenState extends State<AuthScreen> {
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () async {
-                            await context.read<AuthProvider>().login(
-                              email: emailController.text.trim(),
-                              password: passwordController.text,
-                            );
+                          onPressed: provider.isLoading
+                              ? null
+                              : () async {
+                                  if (isLogin) {
+                                    await provider.login(
+                                      email: emailController.text.trim(),
+                                      password: passwordController.text,
+                                    );
+                                  } else {
+                                    await provider.register(
+                                      userName: usernameController.text.trim(),
+                                      email: emailController.text.trim(),
+                                      password: passwordController.text,
+                                      displayName: displayNameController.text
+                                          .trim(),
+                                    );
+                                  }
 
-                            if (!context.mounted) return;
+                                  if (!context.mounted) return;
 
-                            final authProvider = context.read<AuthProvider>();
-
-                            if (authProvider.isAuthenticated) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Login successful!'),
-                                ),
-                              );
-                            } else if (authProvider.errorMessage != null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(authProvider.errorMessage!),
-                                ),
-                              );
-                            }
-                          },
+                                  if (provider.errorMessage != null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(provider.errorMessage!),
+                                      ),
+                                    );
+                                  } else if (isLogin &&
+                                      provider.isAuthenticated) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Login successful!'),
+                                      ),
+                                    );
+                                  } else if (!isLogin) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Account created!'),
+                                      ),
+                                    );
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isLogin
                                 ? const Color(0xffB388FF)

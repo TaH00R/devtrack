@@ -2,6 +2,8 @@ package com.devtrack.backend.controllers;
 
 import com.devtrack.backend.dto.AuthResponseDTO;
 import com.devtrack.backend.dto.LoginRequestDTO;
+import com.devtrack.backend.dto.UserRequestDTO;
+import com.devtrack.backend.dto.UserResponseDTO;
 import com.devtrack.backend.services.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -21,5 +23,12 @@ public class AuthController {
             @Valid @RequestBody LoginRequestDTO loginRequestDTO
     ) {
         return authService.login(loginRequestDTO);
+    }
+
+    @PostMapping("/register")
+    public UserResponseDTO register(
+            @Valid @RequestBody UserRequestDTO userRequestDTO
+    ) {
+        return authService.register(userRequestDTO);
     }
 }

@@ -1,4 +1,4 @@
-package com.devtrack.backend.services;
+package com.devtrack.backend.security;
 
 import com.devtrack.backend.entities.User;
 import com.devtrack.backend.repos.UserRepository;

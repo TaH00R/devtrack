@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
         "devtrack"
-    ]
+    ],
+    "java.compile.nullAnalysis.mode": "automatic"
 }

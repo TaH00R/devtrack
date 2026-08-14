@@ -1,4 +1,5 @@
 import 'package:devtrack/features/auth/providers/auth_provider.dart';
+import 'package:devtrack/features/auth/widgets/field.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -83,7 +84,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           ? "continue where you left off."
                           : "start tracking your progress.",
                       style: GoogleFonts.jetBrainsMono(
-                        color: Colors.white38,
+                        color: const Color.fromARGB(133, 255, 255, 255),
                         fontSize: 13,
                       ),
                     ),
@@ -117,7 +118,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       const SizedBox(height: 20),
 
                       if (!isLogin) ...[
-                        _buildField(
+                        Field(
                           controller: usernameController,
                           label: "USERNAME",
                           hint: "your_username",
@@ -125,7 +126,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
                         const SizedBox(height: 14),
 
-                        _buildField(
+                        Field(
                           controller: displayNameController,
                           label: "DISPLAY NAME",
                           hint: "Your Name",
@@ -134,7 +135,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         const SizedBox(height: 14),
                       ],
 
-                      _buildField(
+                      Field(
                         controller: emailController,
                         label: "EMAIL",
                         hint: "you@example.com",
@@ -143,7 +144,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
                       const SizedBox(height: 14),
 
-                      _buildField(
+                      Field(
                         controller: passwordController,
                         label: "PASSWORD",
                         hint: "••••••••",
@@ -199,11 +200,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     );
                                   } else if (isLogin &&
                                       provider.isAuthenticated) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Login successful!'),
-                                      ),
-                                    );
+                                        Navigator.pushReplacementNamed(context, '/home');
                                   } else if (!isLogin) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
@@ -272,79 +269,11 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
 
                 const SizedBox(height: 30),
-
-                // Footer
-                Center(
-                  child: Text(
-                    "> one commit at a time.",
-                    style: GoogleFonts.jetBrainsMono(
-                      color: Colors.white12,
-                      fontSize: 11,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    TextInputType? keyboardType,
-    bool obscureText = false,
-    Widget? suffix,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.jetBrainsMono(
-            color: Colors.white38,
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-
-        const SizedBox(height: 7),
-
-        TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          obscureText: obscureText,
-          style: GoogleFonts.jetBrainsMono(color: Colors.white, fontSize: 13),
-          cursorColor: const Color(0xffB388FF),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: GoogleFonts.jetBrainsMono(
-              color: Colors.white12,
-              fontSize: 13,
-            ),
-            filled: true,
-            fillColor: const Color(0xff121214),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 14,
-            ),
-            suffixIcon: suffix,
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(9),
-              borderSide: const BorderSide(color: Colors.white10),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(9),
-              borderSide: const BorderSide(color: Color(0xffB388FF)),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

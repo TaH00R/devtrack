@@ -48,7 +48,16 @@ public class AuthService {
 
         String token = jwtTokenProvider.generateToken(authentication);
 
-        return new AuthResponseDTO(token);
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new DevtrackApiException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+
+        return new AuthResponseDTO(
+                token,
+                user.getId()
+        );
     }
 
     public UserResponseDTO register(UserRequestDTO request) {

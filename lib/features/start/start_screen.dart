@@ -35,15 +35,20 @@ class StartScreen extends StatelessWidget {
                       left: 15,
                       child: GestureDetector(
                         onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const DashboardScreen()));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const DashboardScreen(),
+                            ),
+                          );
                         },
                         child: Hero(
-  tag: "dashboard_logo",
-  child: Image.asset(
-    "assets/images/appbar.png",
-    width: 50,
-  ),
-),
+                          tag: "dashboard_logo",
+                          child: Image.asset(
+                            "assets/images/appbar.png",
+                            width: 50,
+                          ),
+                        ),
                       ),
                     ),
                   ],

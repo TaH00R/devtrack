@@ -7,6 +7,7 @@ import com.devtrack.backend.models.DevtrackApiException;
 import com.devtrack.backend.repos.UserRepository;
 import com.devtrack.backend.security.CustomUserDetails;
 import com.devtrack.backend.services.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -112,6 +113,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long id) {
 
         User currentUser = getCurrentUser();

@@ -41,6 +41,7 @@ class GoalProvider extends ChangeNotifier {
 
     try {
       _goals = await _goalRepository.getGoals();
+      sortGoalsByDeadline();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -116,4 +117,40 @@ class GoalProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> toggleGoalCompletion(int goalId) async {
+  final goal = _goals.firstWhere(
+    (goal) => goal.id == goalId,
+  );
+
+  final updatedGoal = GoalRequest(
+    title: goal.title,
+    description: goal.description,
+    completed: !(goal.completed ?? false),
+    deadline: goal.deadline,
+    userId: goal.userId,
+  );
+
+  await updateGoal(goalId, updatedGoal);
+}
+
+void sortGoalsByDeadline() {
+  _goals.sort((a, b) {
+    if (a.deadline == null && b.deadline == null) {
+      return 0;
+    }
+
+    if (a.deadline == null) {
+      return 1;
+    }
+
+    if (b.deadline == null) {
+      return -1;
+    }
+
+    return a.deadline!.compareTo(b.deadline!);
+  });
+
+  notifyListeners();
+}
 }

@@ -3,6 +3,7 @@ import 'package:devtrack/features/dashboard/dashboard_screen.dart';
 import 'package:devtrack/features/start/widgets/card.dart';
 import 'package:devtrack/features/start/widgets/note.dart';
 import 'package:devtrack/features/start/widgets/task.dart';
+import 'package:devtrack/shared/providers/goal_provider.dart';
 import 'package:devtrack/shared/providers/note_provider.dart';
 import 'package:devtrack/shared/providers/project_provider.dart';
 import 'package:devtrack/shared/providers/task_provider.dart';
@@ -27,6 +28,7 @@ class _StartScreenState extends State<StartScreen> {
       context.read<TaskProvider>().getTasks();
       context.read<ProjectProvider>().getProjects();
       context.read<NoteProvider>().getNotes();
+      context.read<GoalProvider>().getGoals();
 
       final userId = context.read<AuthProvider>().userId;
 
@@ -42,10 +44,12 @@ class _StartScreenState extends State<StartScreen> {
     final projectProvider = context.watch<ProjectProvider>();
     final noteProvider = context.watch<NoteProvider>();
     final userProvider = context.watch<UserProvider>();
+    final goalProvider = context.watch<GoalProvider>();
 
     final tasks = taskProvider.tasks;
     final projects = projectProvider.projects;
     final notes = noteProvider.notes;
+    final goals = goalProvider.goals;
 
     final displayName =
         userProvider.user?.displayName ??
@@ -77,6 +81,7 @@ class _StartScreenState extends State<StartScreen> {
     final projectPercentage = (projectProgress * 100).round();
 
     final hour = DateTime.now().hour;
+    
 
     String greeting;
 
@@ -424,6 +429,111 @@ class _StartScreenState extends State<StartScreen> {
                               ],
                             ),
                     ),
+
+                    const SizedBox(height: 18),
+
+                    // RECENT GOALS
+AppCard(
+  title: "GOALS",
+  color: const Color(0xffB388FF),
+  trailing: "View all >",
+  child: goals.isEmpty
+      ? Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: 8,
+          ),
+          child: Text(
+            "No goals yet.",
+            style: GoogleFonts.jetBrainsMono(
+              color: Colors.white38,
+              fontSize: 13,
+            ),
+          ),
+        )
+      : Column(
+          children: [
+            ...goals.take(2).toList().asMap().entries.map(
+              (entry) {
+                final goal = entry.value;
+
+                final deadline = goal.deadline == null
+                    ? "No deadline"
+                    : "${goal.deadline!.day.toString().padLeft(2, '0')}/"
+                      "${goal.deadline!.month.toString().padLeft(2, '0')}/"
+                      "${goal.deadline!.year}";
+
+                return Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            goalProvider.toggleGoalCompletion(goal.id);
+                          },
+
+                          icon: Icon(
+                          goal.completed == true
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
+                          color: goal.completed == true
+                              ? const Color(0xff6EE7A2)
+                              : const Color(0xffB388FF),
+                          size: 20,
+                        )),
+
+                        const SizedBox(width: 12),
+
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                goal.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.jetBrainsMono(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  decoration:
+                                      goal.completed == true
+                                          ? TextDecoration.lineThrough
+                                          : null,
+                                ),
+                              ),
+
+                              const SizedBox(height: 5),
+
+                              Text(
+                                goal.completed == true
+                                    ? "Completed"
+                                    : "Deadline: $deadline",
+                                style: GoogleFonts.jetBrainsMono(
+                                  color: goal.completed == true
+                                      ? const Color(0xff6EE7A2)
+                                      : Colors.white38,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    if (entry.key != goals.take(2).length - 1)
+                      const Divider(
+                        color: Colors.white10,
+                      ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+), 
 
                     const SizedBox(height: 30),
                   ],

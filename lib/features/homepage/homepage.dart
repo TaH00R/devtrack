@@ -1,3 +1,4 @@
+import 'package:devtrack/features/goals/goal_screen.dart';
 import 'package:devtrack/features/start/start_screen.dart';
 import 'package:devtrack/shared/widgets/bottom_navbar.dart';
 import 'package:flutter/material.dart';
@@ -14,12 +15,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xff121214),
-  body: IndexedStack(
-    index: selectedIndex,
-    children: const [
-      StartScreen(),
-    ],
-  ),
+  body: [
+  const StartScreen(),
+  const GoalScreen(),
+][selectedIndex],
   bottomNavigationBar: DevTrackNavBar(
     selectedIndex: selectedIndex,
     onTap: (index) {

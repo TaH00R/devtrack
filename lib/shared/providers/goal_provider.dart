@@ -1,31 +1,31 @@
-import 'package:devtrack/shared/models/note_request.dart';
-import 'package:devtrack/shared/models/note_response.dart';
-import 'package:devtrack/shared/repositories/note_repository.dart';
+import 'package:devtrack/shared/models/goal_request.dart';
+import 'package:devtrack/shared/models/goal_response.dart';
+import 'package:devtrack/shared/repositories/goal_repository.dart';
 import 'package:flutter/foundation.dart';
 
-class NoteProvider extends ChangeNotifier {
-  final NoteRepository _noteRepository;
+class GoalProvider extends ChangeNotifier {
+  final GoalRepository _goalRepository;
 
-  NoteProvider(this._noteRepository);
+  GoalProvider(this._goalRepository);
 
-  NoteResponse? _note;
-  List<NoteResponse> _notes = [];
+  GoalResponse? _goal;
+  List<GoalResponse> _goals = [];
 
   bool _isLoading = false;
   String? _error;
 
-  NoteResponse? get note => _note;
-  List<NoteResponse> get notes => _notes;
+  GoalResponse? get goal => _goal;
+  List<GoalResponse> get goals => _goals;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  Future<void> getNote(int noteId) async {
+  Future<void> getGoal(int goalId) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _note = await _noteRepository.getNote(noteId);
+      _goal = await _goalRepository.getGoal(goalId);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -34,13 +34,13 @@ class NoteProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> getNotes() async {
+  Future<void> getGoals() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _notes = await _noteRepository.getNotes();
+      _goals = await _goalRepository.getGoals();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -49,14 +49,14 @@ class NoteProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> createNote(NoteRequest request) async {
+  Future<void> createGoal(GoalRequest data) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _note = await _noteRepository.createNote(request);
-      _notes.add(_note!);
+      _goal = await _goalRepository.createGoal(data);
+      _goals.add(_goal!);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -65,26 +65,26 @@ class NoteProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateNote(
-    int noteId,
-    NoteRequest request,
+  Future<void> updateGoal(
+    int goalId,
+    GoalRequest data,
   ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _note = await _noteRepository.updateNote(
-        noteId,
-        request,
+      _goal = await _goalRepository.updateGoal(
+        goalId,
+        data,
       );
 
-      final index = _notes.indexWhere(
-        (note) => note.id == noteId,
+      final index = _goals.indexWhere(
+        (goal) => goal.id == goalId,
       );
 
       if (index != -1) {
-        _notes[index] = _note!;
+        _goals[index] = _goal!;
       }
     } catch (e) {
       _error = e.toString();
@@ -94,19 +94,21 @@ class NoteProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteNote(int noteId) async {
+  Future<void> deleteGoal(int goalId) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      await _noteRepository.deleteNote(noteId);
+      await _goalRepository.deleteGoal(goalId);
 
-      _note = null;
-
-      _notes.removeWhere(
-        (note) => note.id == noteId,
+      _goals.removeWhere(
+        (goal) => goal.id == goalId,
       );
+
+      if (_goal?.id == goalId) {
+        _goal = null;
+      }
     } catch (e) {
       _error = e.toString();
     } finally {

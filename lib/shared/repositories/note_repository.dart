@@ -1,4 +1,5 @@
 import 'package:devtrack/core/network/api_client.dart';
+import 'package:devtrack/shared/models/note_request.dart';
 import 'package:devtrack/shared/models/note_response.dart';
 
 class NoteRepository {
@@ -6,20 +7,9 @@ class NoteRepository {
 
   NoteRepository(this._apiClient);
 
-  Future<NoteResponse> getNote(int noteId) async{
+  Future<NoteResponse> getNote(int noteId) async {
     final response = await _apiClient.dio.get(
       '/api/notes/$noteId',
-    );
-
-    return NoteResponse.fromJson(response.data);
-  }
-
-  Future<NoteResponse> createNote(
-    Map<String, dynamic> data,
-  ) async {
-    final response = await _apiClient.dio.post(
-      '/api/notes',
-      data: data,
     );
 
     return NoteResponse.fromJson(response.data);
@@ -35,13 +25,22 @@ class NoteRepository {
         .toList();
   }
 
+  Future<NoteResponse> createNote(NoteRequest request) async {
+    final response = await _apiClient.dio.post(
+      '/api/notes',
+      data: request.toJson(),
+    );
+
+    return NoteResponse.fromJson(response.data);
+  }
+
   Future<NoteResponse> updateNote(
     int noteId,
-    Map<String, dynamic> data,
+    NoteRequest request,
   ) async {
     final response = await _apiClient.dio.patch(
       '/api/notes/$noteId',
-      data: data,
+      data: request.toJson(),
     );
 
     return NoteResponse.fromJson(response.data);

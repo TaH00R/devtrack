@@ -66,6 +66,13 @@ class DevTrackNavBar extends StatelessWidget {
                 selectedIndex: selectedIndex,
                 onTap: onTap,
               ),
+              _NavItem(
+                icon: Pixel.check,
+                label: "Tasks",
+                index: 4,
+                selectedIndex: selectedIndex,
+                onTap: onTap,
+              ),
             ],
           ),
         ),

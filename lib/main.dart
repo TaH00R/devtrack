@@ -6,11 +6,13 @@ import 'package:devtrack/features/auth/repositories/auth_repository.dart';
 import 'package:devtrack/shared/providers/goal_provider.dart';
 import 'package:devtrack/shared/providers/note_provider.dart';
 import 'package:devtrack/shared/providers/project_provider.dart';
+import 'package:devtrack/shared/providers/tag_provider.dart';
 import 'package:devtrack/shared/providers/task_provider.dart';
 import 'package:devtrack/shared/providers/user_provider.dart';
 import 'package:devtrack/shared/repositories/goal_repository.dart';
 import 'package:devtrack/shared/repositories/note_repository.dart';
 import 'package:devtrack/shared/repositories/project_repository.dart';
+import 'package:devtrack/shared/repositories/tag_repository.dart';
 import 'package:devtrack/shared/repositories/task_repository.dart';
 import 'package:devtrack/shared/repositories/user_repository.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +30,7 @@ void main() {
   final projectRepository = ProjectRepository(apiClient);
   final taskRepository = TaskRepository(apiClient);
   final userRepository = UserRepository(apiClient);
+  final tagRepository = TagRepository(apiClient);
 
   runApp(
     MultiProvider(
@@ -49,6 +52,9 @@ void main() {
         ),
         ChangeNotifierProvider(
           create: (_) => UserProvider(userRepository),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TagProvider(tagRepository),
         ),
       ],
       child: const MyApp(),

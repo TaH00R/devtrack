@@ -64,6 +64,39 @@ class TaskProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> toggleTaskCompletion(int taskId) async {
+  final index = _tasks.indexWhere(
+    (task) => task.id == taskId,
+  );
+
+  if (index == -1) return;
+
+  final task = _tasks[index];
+
+  final request = TaskRequest(
+    title: task.title,
+    description: task.description,
+    completed: !(task.completed ?? false),
+    projectId: task.projectId,
+    tagIds: task.tagIds?.toSet() ?? {},
+  );
+
+  try {
+    final updatedTask =
+        await _taskRepository.updateTask(
+      taskId,
+      request,
+    );
+
+    _tasks[index] = updatedTask;
+
+    notifyListeners();
+  } catch (e) {
+    _error = e.toString();
+    notifyListeners();
+  }
+}
+
   Future<void> updateTask(int taskId, TaskRequest request) async {
     _isLoading = true;
     _error = null;

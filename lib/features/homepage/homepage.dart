@@ -2,6 +2,7 @@ import 'package:devtrack/features/goals/goal_screen.dart';
 import 'package:devtrack/features/notes/note_screen.dart';
 import 'package:devtrack/features/projects/project_screen.dart';
 import 'package:devtrack/features/start/start_screen.dart';
+import 'package:devtrack/features/tasks/task_screen.dart';
 import 'package:devtrack/shared/widgets/bottom_navbar.dart';
 import 'package:flutter/material.dart';
 class HomeScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   const GoalScreen(),
   const ProjectScreen(),  
   const NoteScreen(),
+  const TaskScreen()
 ][selectedIndex],
   bottomNavigationBar: DevTrackNavBar(
     selectedIndex: selectedIndex,

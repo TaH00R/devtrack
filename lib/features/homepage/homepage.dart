@@ -1,4 +1,5 @@
 import 'package:devtrack/features/goals/goal_screen.dart';
+import 'package:devtrack/features/notes/note_screen.dart';
 import 'package:devtrack/features/projects/project_screen.dart';
 import 'package:devtrack/features/start/start_screen.dart';
 import 'package:devtrack/shared/widgets/bottom_navbar.dart';
@@ -19,7 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
   body: [
   const StartScreen(),
   const GoalScreen(),
-  const ProjectScreen(),
+  const ProjectScreen(),  
+  const NoteScreen(),
 ][selectedIndex],
   bottomNavigationBar: DevTrackNavBar(
     selectedIndex: selectedIndex,

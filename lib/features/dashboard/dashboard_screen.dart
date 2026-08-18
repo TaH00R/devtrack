@@ -1,10 +1,12 @@
 import 'package:devtrack/features/auth/providers/auth_provider.dart';
+import 'package:devtrack/features/profile/developer_profile_screen.dart';
 import 'package:devtrack/shared/providers/goal_provider.dart';
 import 'package:devtrack/shared/providers/github_provider.dart';
 import 'package:devtrack/shared/providers/leetcode_provider.dart';
 import 'package:devtrack/shared/providers/project_provider.dart';
 import 'package:devtrack/shared/providers/task_provider.dart';
 import 'package:devtrack/shared/providers/user_provider.dart';
+import 'package:devtrack/shared/routes/smooth_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -509,98 +511,103 @@ class _DashboardScreenState
     String? email,
     String? displayName,
   ) {
-    return Container(
-      width: double.infinity,
-      padding:
-          const EdgeInsets.all(18),
-
-      decoration:
-          BoxDecoration(
-        color:
-            const Color(0xff1A1A1E),
-        borderRadius:
-            BorderRadius.circular(16),
-        border:
-            Border.all(
-          color: Colors.white10,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context, smoothRoute(const DeveloperProfileScreen()));
+      },
+      child: Container(
+        width: double.infinity,
+        padding:
+            const EdgeInsets.all(18),
+      
+        decoration:
+            BoxDecoration(
+          color:
+              const Color(0xff1A1A1E),
+          borderRadius:
+              BorderRadius.circular(16),
+          border:
+              Border.all(
+            color: Colors.white10,
+          ),
         ),
-      ),
-
-      child: Row(
-        children: [
-          Container(
-            width: 58,
-            height: 58,
-
-            decoration:
-                BoxDecoration(
-              color:
-                  const Color(
-                0xffB388FF,
-              ).withOpacity(.10),
-
-              borderRadius:
-                  BorderRadius.circular(
-                14,
-              ),
-
-              border:
-                  Border.all(
+      
+        child: Row(
+          children: [
+            Container(
+              width: 58,
+              height: 58,
+      
+              decoration:
+                  BoxDecoration(
                 color:
                     const Color(
                   0xffB388FF,
-                ).withOpacity(.25),
+                ).withOpacity(.10),
+      
+                borderRadius:
+                    BorderRadius.circular(
+                  14,
+                ),
+      
+                border:
+                    Border.all(
+                  color:
+                      const Color(
+                    0xffB388FF,
+                  ).withOpacity(.25),
+                ),
+              ),
+      
+              child: const Icon(
+                Icons.person_outline,
+                color:
+                    Color(0xffB388FF),
+                size: 30,
               ),
             ),
-
-            child: const Icon(
-              Icons.person_outline,
-              color:
-                  Color(0xffB388FF),
-              size: 30,
-            ),
-          ),
-
-          const SizedBox(width: 15),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
-              children: [
-                Text(
-                  displayName ??
-                      "No Display Name",
-                  style:
-                      GoogleFonts.jetBrainsMono(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight:
-                        FontWeight.bold,
-                  ),
-                ),
-
-                if (email != null &&
-                    email.isNotEmpty) ...[
-                  const SizedBox(height: 7),
-
+      
+            const SizedBox(width: 15),
+      
+            Expanded(
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
                   Text(
-                    email,
-                    maxLines: 1,
-                    overflow:
-                        TextOverflow.ellipsis,
+                    displayName ??
+                        "No Display Name",
                     style:
                         GoogleFonts.jetBrainsMono(
-                      color:
-                          Colors.white38,
-                      fontSize: 11,
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight:
+                          FontWeight.bold,
                     ),
                   ),
+      
+                  if (email != null &&
+                      email.isNotEmpty) ...[
+                    const SizedBox(height: 7),
+      
+                    Text(
+                      email,
+                      maxLines: 1,
+                      overflow:
+                          TextOverflow.ellipsis,
+                      style:
+                          GoogleFonts.jetBrainsMono(
+                        color:
+                            Colors.white38,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

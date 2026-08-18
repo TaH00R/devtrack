@@ -10,7 +10,7 @@ class ApiClient {
   ApiClient(this._tokenStorage) {
     dio = Dio(
       BaseOptions(
-        baseUrl: 'http://10.3.0.67:6967',
+        baseUrl: 'http://10.1.2.146:6967',
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
         headers: {

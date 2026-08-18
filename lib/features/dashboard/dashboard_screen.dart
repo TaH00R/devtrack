@@ -277,12 +277,16 @@ class _DashboardScreenState
                   CrossAxisAlignment.start,
 
               children: [
-                _buildHeader(username),
+
+                _buildHeader(
+                  username,
+                ),
 
                 const SizedBox(height: 24),
 
                 _buildProfileSection(
                   user?.email,
+                  user?.displayName,
                 ),
 
                 const SizedBox(height: 22),
@@ -441,7 +445,7 @@ class _DashboardScreenState
           children: [
             Expanded(
               child: Text(
-                username.toUpperCase(),
+                username,
                 maxLines: 1,
                 overflow:
                     TextOverflow.ellipsis,
@@ -503,6 +507,7 @@ class _DashboardScreenState
 
   Widget _buildProfileSection(
     String? email,
+    String? displayName,
   ) {
     return Container(
       width: double.infinity,
@@ -564,7 +569,8 @@ class _DashboardScreenState
                   CrossAxisAlignment.start,
               children: [
                 Text(
-                  "DEVELOPER PROFILE",
+                  displayName ??
+                      "No Display Name",
                   style:
                       GoogleFonts.jetBrainsMono(
                     color: Colors.white,

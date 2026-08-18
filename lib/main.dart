@@ -3,13 +3,17 @@ import 'package:devtrack/core/network/api_client.dart';
 import 'package:devtrack/core/storage/token_storage.dart';
 import 'package:devtrack/features/auth/providers/auth_provider.dart';
 import 'package:devtrack/features/auth/repositories/auth_repository.dart';
+import 'package:devtrack/shared/providers/github_provider.dart';
 import 'package:devtrack/shared/providers/goal_provider.dart';
+import 'package:devtrack/shared/providers/leetcode_provider.dart';
 import 'package:devtrack/shared/providers/note_provider.dart';
 import 'package:devtrack/shared/providers/project_provider.dart';
 import 'package:devtrack/shared/providers/tag_provider.dart';
 import 'package:devtrack/shared/providers/task_provider.dart';
 import 'package:devtrack/shared/providers/user_provider.dart';
+import 'package:devtrack/shared/repositories/github_repository.dart';
 import 'package:devtrack/shared/repositories/goal_repository.dart';
+import 'package:devtrack/shared/repositories/leetcode_repository.dart';
 import 'package:devtrack/shared/repositories/note_repository.dart';
 import 'package:devtrack/shared/repositories/project_repository.dart';
 import 'package:devtrack/shared/repositories/tag_repository.dart';
@@ -31,6 +35,8 @@ void main() {
   final taskRepository = TaskRepository(apiClient);
   final userRepository = UserRepository(apiClient);
   final tagRepository = TagRepository(apiClient);
+  final leetcodeRepository = LeetcodeRepository(apiClient);
+  final githubRepository = GithubRepository(apiClient);
 
   runApp(
     MultiProvider(
@@ -55,6 +61,12 @@ void main() {
         ),
         ChangeNotifierProvider(
           create: (_) => TagProvider(tagRepository),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => LeetcodeProvider(leetcodeRepository),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => GithubProvider(githubRepository),
         ),
       ],
       child: const MyApp(),

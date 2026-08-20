@@ -1,3 +1,4 @@
+import 'package:devtrack/shared/models/leetcode_live_data.dart';
 import 'package:devtrack/shared/models/leetcode_profile.dart';
 import 'package:devtrack/shared/repositories/leetcode_repository.dart';
 import 'package:flutter/foundation.dart';
@@ -9,11 +10,21 @@ class LeetcodeProvider extends ChangeNotifier {
 
   List<LeetcodeProfile> _profiles = [];
 
+  LeetcodeLiveData? _liveData;
+
   bool _isLoading = false;
+  bool _isLiveLoading = false;
+
   String? _error;
 
   List<LeetcodeProfile> get profiles => _profiles;
+
+  LeetcodeLiveData? get liveData => _liveData;
+
   bool get isLoading => _isLoading;
+
+  bool get isLiveLoading => _isLiveLoading;
+
   String? get error => _error;
 
   Future<void> getProfiles() async {
@@ -22,7 +33,15 @@ class LeetcodeProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _profiles = await _leetcodeRepository.getProfiles();
+      _profiles =
+          await _leetcodeRepository
+              .getProfiles();
+
+      if (_profiles.isNotEmpty) {
+        await getLiveData(
+          _profiles.first.username,
+        );
+      }
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -31,18 +50,39 @@ class LeetcodeProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> getLiveData(
+    String username,
+  ) async {
+    _isLiveLoading = true;
+    notifyListeners();
+
+    try {
+      _liveData =
+          await _leetcodeRepository
+              .getLiveData(username);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLiveLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> createProfile(
-    LeetcodeProfile profile,
+    String username,
   ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final createdProfile =
-          await _leetcodeRepository.createProfile(profile);
+      final profile =
+          await _leetcodeRepository
+              .createProfile(username);
 
-      _profiles.add(createdProfile);
+      _profiles.add(profile);
+
+      await getLiveData(username);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -60,19 +100,26 @@ class LeetcodeProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final updatedProfile =
-          await _leetcodeRepository.updateProfile(
+      final updated =
+          await _leetcodeRepository
+              .updateProfile(
         profileId,
         profile,
       );
 
-      final index = _profiles.indexWhere(
-        (profile) => profile.id == profileId,
+      final index =
+          _profiles.indexWhere(
+        (item) =>
+            item.id == profileId,
       );
 
       if (index != -1) {
-        _profiles[index] = updatedProfile;
+        _profiles[index] = updated;
       }
+
+      await getLiveData(
+        updated.username,
+      );
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -81,17 +128,23 @@ class LeetcodeProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteProfile(int profileId) async {
+  Future<void> deleteProfile(
+    int profileId,
+  ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      await _leetcodeRepository.deleteProfile(profileId);
+      await _leetcodeRepository
+          .deleteProfile(profileId);
 
       _profiles.removeWhere(
-        (profile) => profile.id == profileId,
+        (profile) =>
+            profile.id == profileId,
       );
+
+      _liveData = null;
     } catch (e) {
       _error = e.toString();
     } finally {

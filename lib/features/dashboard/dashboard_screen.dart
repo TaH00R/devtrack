@@ -1,5 +1,7 @@
 import 'package:devtrack/features/auth/providers/auth_provider.dart';
-import 'package:devtrack/features/profile/developer_profile_screen.dart';
+import 'package:devtrack/features/profile/profile_screen.dart';
+import 'package:devtrack/shared/models/github_live_data.dart';
+import 'package:devtrack/shared/models/leetcode_live_data.dart';
 import 'package:devtrack/shared/providers/goal_provider.dart';
 import 'package:devtrack/shared/providers/github_provider.dart';
 import 'package:devtrack/shared/providers/leetcode_provider.dart';
@@ -137,7 +139,9 @@ class _DashboardScreenState
       if (authProvider.userId != null)
         context
             .read<UserProvider>()
-            .getUser(authProvider.userId!),
+            .getUser(
+              authProvider.userId!,
+            ),
     ]);
   }
 
@@ -187,14 +191,10 @@ class _DashboardScreenState
     final user = userProvider.user;
 
     final github =
-        githubProvider.profiles.isNotEmpty
-            ? githubProvider.profiles.first
-            : null;
+        githubProvider.liveData;
 
     final leetcode =
-        leetcodeProvider.profiles.isNotEmpty
-            ? leetcodeProvider.profiles.first
-            : null;
+        leetcodeProvider.liveData;
 
     final projects =
         projectProvider.projects;
@@ -216,13 +216,14 @@ class _DashboardScreenState
         projects.isEmpty
             ? 0
             : projects.where((project) {
-                final projectTasks = tasks
-                    .where(
-                      (task) =>
-                          task.projectId ==
-                          project.id,
-                    )
-                    .toList();
+                final projectTasks =
+                    tasks
+                        .where(
+                          (task) =>
+                              task.projectId ==
+                              project.id,
+                        )
+                        .toList();
 
                 return projectTasks.isNotEmpty &&
                     projectTasks.every(
@@ -243,7 +244,8 @@ class _DashboardScreenState
         goals.length - completedGoals;
 
     final activeProjects =
-        projects.length - completedProjects;
+        projects.length -
+            completedProjects;
 
     final username =
         user?.displayName ??
@@ -256,7 +258,9 @@ class _DashboardScreenState
 
       body: SafeArea(
         child: RefreshIndicator(
-          color: const Color(0xffB388FF),
+          color:
+              const Color(0xffB388FF),
+
           backgroundColor:
               const Color(0xff1A1A1E),
 
@@ -279,19 +283,22 @@ class _DashboardScreenState
                   CrossAxisAlignment.start,
 
               children: [
-
                 _buildHeader(
                   username,
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(
+                  height: 24,
+                ),
 
                 _buildProfileSection(
                   user?.email,
                   user?.displayName,
                 ),
 
-                const SizedBox(height: 22),
+                const SizedBox(
+                  height: 22,
+                ),
 
                 _buildSectionTitle(
                   "GITHUB",
@@ -301,14 +308,18 @@ class _DashboardScreenState
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(
+                  height: 10,
+                ),
 
                 _buildGithubCard(
                   github,
-                  githubProvider.isLoading,
+                  githubProvider.isLiveLoading,
                 ),
 
-                const SizedBox(height: 22),
+                const SizedBox(
+                  height: 22,
+                ),
 
                 _buildSectionTitle(
                   "LEETCODE",
@@ -318,14 +329,18 @@ class _DashboardScreenState
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(
+                  height: 10,
+                ),
 
                 _buildLeetcodeCard(
                   leetcode,
-                  leetcodeProvider.isLoading,
+                  leetcodeProvider.isLiveLoading,
                 ),
 
-                const SizedBox(height: 22),
+                const SizedBox(
+                  height: 22,
+                ),
 
                 _buildSectionTitle(
                   "PROJECTS",
@@ -335,7 +350,9 @@ class _DashboardScreenState
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(
+                  height: 10,
+                ),
 
                 _buildProjectsCard(
                   projects.length,
@@ -343,7 +360,9 @@ class _DashboardScreenState
                   activeProjects,
                 ),
 
-                const SizedBox(height: 22),
+                const SizedBox(
+                  height: 22,
+                ),
 
                 _buildSectionTitle(
                   "GOALS",
@@ -353,7 +372,9 @@ class _DashboardScreenState
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(
+                  height: 10,
+                ),
 
                 _buildGoalsCard(
                   goals.length,
@@ -361,7 +382,9 @@ class _DashboardScreenState
                   activeGoals,
                 ),
 
-                const SizedBox(height: 22),
+                const SizedBox(
+                  height: 22,
+                ),
 
                 _buildSectionTitle(
                   "ACTIVITY",
@@ -371,14 +394,18 @@ class _DashboardScreenState
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(
+                  height: 10,
+                ),
 
                 _buildActivityCard(
                   tasks.length,
                   completedTasks,
                 ),
 
-                const SizedBox(height: 22),
+                const SizedBox(
+                  height: 22,
+                ),
 
                 _buildSectionTitle(
                   "TECH STACK",
@@ -388,18 +415,23 @@ class _DashboardScreenState
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(
+                  height: 10,
+                ),
 
                 _buildTechStackCard(),
 
-                const SizedBox(height: 28),
+                const SizedBox(
+                  height: 28,
+                ),
 
                 Center(
                   child: Text(
                     "> keep building.",
                     style:
                         GoogleFonts.jetBrainsMono(
-                      color: Colors.white24,
+                      color:
+                          Colors.white24,
                       fontSize: 11,
                     ),
                   ),
@@ -436,12 +468,15 @@ class _DashboardScreenState
           greeting,
           style:
               GoogleFonts.jersey10(
-            color: Colors.white70,
+            color:
+                Colors.white70,
             fontSize: 24,
           ),
         ),
 
-        const SizedBox(height: 4),
+        const SizedBox(
+          height: 4,
+        ),
 
         Row(
           children: [
@@ -462,10 +497,13 @@ class _DashboardScreenState
               ),
             ),
 
-            const SizedBox(width: 10),
+            const SizedBox(
+              width: 10,
+            ),
 
             const Icon(
-              Icons.waving_hand_outlined,
+              Icons
+                  .waving_hand_outlined,
               color:
                   Color(0xffF3C86A),
               size: 27,
@@ -473,7 +511,9 @@ class _DashboardScreenState
           ],
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(
+          height: 8,
+        ),
 
         Row(
           children: [
@@ -491,13 +531,16 @@ class _DashboardScreenState
               ),
             ),
 
-            const SizedBox(width: 7),
+            const SizedBox(
+              width: 7,
+            ),
 
             Text(
               "one commit at a time.",
               style:
                   GoogleFonts.jetBrainsMono(
-                color: Colors.white38,
+                color:
+                    Colors.white38,
                 fontSize: 12,
               ),
             ),
@@ -513,43 +556,60 @@ class _DashboardScreenState
   ) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, smoothRoute(const DeveloperProfileScreen()));
+        Navigator.push(
+          context,
+          smoothRoute(
+            const DeveloperProfileScreen(),
+          ),
+        );
       },
+
       child: Container(
-        width: double.infinity,
+        width:
+            double.infinity,
+
         padding:
-            const EdgeInsets.all(18),
-      
+            const EdgeInsets.all(
+          18,
+        ),
+
         decoration:
             BoxDecoration(
           color:
-              const Color(0xff1A1A1E),
+              const Color(
+            0xff1A1A1E,
+          ),
+
           borderRadius:
-              BorderRadius.circular(16),
+              BorderRadius.circular(
+            16,
+          ),
+
           border:
               Border.all(
-            color: Colors.white10,
+            color:
+                Colors.white10,
           ),
         ),
-      
+
         child: Row(
           children: [
             Container(
               width: 58,
               height: 58,
-      
+
               decoration:
                   BoxDecoration(
                 color:
                     const Color(
                   0xffB388FF,
                 ).withOpacity(.10),
-      
+
                 borderRadius:
                     BorderRadius.circular(
                   14,
                 ),
-      
+
                 border:
                     Border.all(
                   color:
@@ -558,43 +618,61 @@ class _DashboardScreenState
                   ).withOpacity(.25),
                 ),
               ),
-      
+
               child: const Icon(
-                Icons.person_outline,
+                Icons
+                    .person_outline,
                 color:
-                    Color(0xffB388FF),
+                    Color(
+                  0xffB388FF,
+                ),
                 size: 30,
               ),
             ),
-      
-            const SizedBox(width: 15),
-      
+
+            const SizedBox(
+              width: 15,
+            ),
+
             Expanded(
               child: Column(
                 crossAxisAlignment:
                     CrossAxisAlignment.start,
+
                 children: [
                   Text(
                     displayName ??
                         "No Display Name",
+
+                    maxLines: 1,
+
+                    overflow:
+                        TextOverflow.ellipsis,
+
                     style:
                         GoogleFonts.jetBrainsMono(
-                      color: Colors.white,
+                      color:
+                          Colors.white,
                       fontSize: 12,
                       fontWeight:
                           FontWeight.bold,
                     ),
                   ),
-      
+
                   if (email != null &&
                       email.isNotEmpty) ...[
-                    const SizedBox(height: 7),
-      
+                    const SizedBox(
+                      height: 7,
+                    ),
+
                     Text(
                       email,
+
                       maxLines: 1,
+
                       overflow:
                           TextOverflow.ellipsis,
+
                       style:
                           GoogleFonts.jetBrainsMono(
                         color:
@@ -606,6 +684,12 @@ class _DashboardScreenState
                 ],
               ),
             ),
+
+            const Icon(
+              Icons.chevron_right,
+              color:
+                  Colors.white24,
+            ),
           ],
         ),
       ),
@@ -613,10 +697,11 @@ class _DashboardScreenState
   }
 
   Widget _buildGithubCard(
-    dynamic github,
+    GithubLiveData? github,
     bool loading,
   ) {
-    if (loading && github == null) {
+    if (loading &&
+        github == null) {
       return _buildLoadingCard();
     }
 
@@ -626,21 +711,31 @@ class _DashboardScreenState
         title:
             "NO GITHUB PROFILE",
         subtitle:
-            "Connect your GitHub profile to track your stats.",
+            "Link a GitHub username from your developer profile.",
       );
     }
 
     return Container(
-      width: double.infinity,
+      width:
+          double.infinity,
+
       padding:
-          const EdgeInsets.all(18),
+          const EdgeInsets.all(
+        18,
+      ),
 
       decoration:
           BoxDecoration(
         color:
-            const Color(0xff1A1A1E),
+            const Color(
+          0xff1A1A1E,
+        ),
+
         borderRadius:
-            BorderRadius.circular(16),
+            BorderRadius.circular(
+          16,
+        ),
+
         border:
             Border.all(
           color:
@@ -657,27 +752,33 @@ class _DashboardScreenState
         children: [
           Row(
             children: [
-              Container(
-                width: 45,
-                height: 45,
+              CircleAvatar(
+                radius: 27,
 
-                decoration:
-                    BoxDecoration(
-                  color:
-                      const Color(
-                    0xffB388FF,
-                  ).withOpacity(.10),
-                  borderRadius:
-                      BorderRadius.circular(
-                    11,
-                  ),
-                ),
+                backgroundColor:
+                    const Color(
+                  0xffB388FF,
+                ).withOpacity(.1),
 
-                child: const Icon(
-                  Icons.code,
-                  color:
-                      Color(0xffB388FF),
-                ),
+                backgroundImage:
+                    github.avatarUrl
+                            .isEmpty
+                        ? null
+                        : NetworkImage(
+                            github.avatarUrl,
+                          ),
+
+                child:
+                    github.avatarUrl
+                            .isEmpty
+                        ? const Icon(
+                            Icons.person,
+                            color:
+                                Color(
+                              0xffB388FF,
+                            ),
+                          )
+                        : null,
               ),
 
               const SizedBox(
@@ -688,9 +789,16 @@ class _DashboardScreenState
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
+
                   children: [
                     Text(
-                      "@${github.username}",
+                      '@${github.username}',
+
+                      maxLines: 1,
+
+                      overflow:
+                          TextOverflow.ellipsis,
+
                       style:
                           GoogleFonts.pressStart2p(
                         color:
@@ -699,40 +807,41 @@ class _DashboardScreenState
                       ),
                     ),
 
-                    if (github.profileUrl !=
-                        null) ...[
-                      const SizedBox(
-                        height: 5,
-                      ),
+                    const SizedBox(
+                      height: 5,
+                    ),
 
-                      Text(
-                        github.profileUrl!,
-                        maxLines: 1,
-                        overflow:
-                            TextOverflow
-                                .ellipsis,
-                        style:
-                            GoogleFonts.jetBrainsMono(
-                          color:
-                              Colors.white24,
-                          fontSize: 9,
-                        ),
+                    Text(
+                      github.profileUrl,
+
+                      maxLines: 1,
+
+                      overflow:
+                          TextOverflow.ellipsis,
+
+                      style:
+                          GoogleFonts.jetBrainsMono(
+                        color:
+                            Colors.white24,
+                        fontSize: 9,
                       ),
-                    ],
+                    ),
                   ],
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(
+            height: 20,
+          ),
 
           Row(
             children: [
               Expanded(
                 child: _buildStat(
                   "PUBLIC REPOS",
-                  "${github.publicRepos ?? 0}",
+                  "${github.publicRepos}",
                   const Color(
                     0xffB388FF,
                   ),
@@ -744,7 +853,7 @@ class _DashboardScreenState
               Expanded(
                 child: _buildStat(
                   "FOLLOWERS",
-                  "${github.followers ?? 0}",
+                  "${github.followers}",
                   const Color(
                     0xff64D8FF,
                   ),
@@ -752,40 +861,221 @@ class _DashboardScreenState
               ),
             ],
           ),
+
+          const SizedBox(
+            height: 22,
+          ),
+
+          Text(
+            "CONTRIBUTIONS",
+            style:
+                GoogleFonts.jetBrainsMono(
+              color:
+                  Colors.white38,
+              fontSize: 10,
+              fontWeight:
+                  FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(
+            height: 10,
+          ),
+
+          _buildGithubHeatmap(
+            github.contributions,
+          ),
         ],
       ),
     );
   }
 
+  Widget _buildGithubHeatmap(
+    Map<DateTime, int> contributions,
+  ) {
+    final today =
+        DateTime.now();
+
+    final end = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    );
+
+    final start = end.subtract(
+      const Duration(
+        days: 364,
+      ),
+    );
+
+    return SizedBox(
+      height: 135,
+
+      child: SingleChildScrollView(
+        scrollDirection:
+            Axis.horizontal,
+
+        child: Row(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+
+          children:
+              List.generate(
+            53,
+            (week) {
+              return Padding(
+                padding:
+                    const EdgeInsets
+                        .only(
+                  right: 3,
+                ),
+
+                child: Column(
+                  children:
+                      List.generate(
+                    7,
+                    (day) {
+                      final date =
+                          start.add(
+                        Duration(
+                          days:
+                              week *
+                                      7 +
+                                  day,
+                        ),
+                      );
+
+                      if (date.isAfter(
+                        end,
+                      )) {
+                        return Container(
+                          width: 10,
+                          height: 10,
+                          margin:
+                              const EdgeInsets
+                                  .only(
+                            bottom: 3,
+                          ),
+                        );
+                      }
+
+                      final key =
+                          DateTime(
+                        date.year,
+                        date.month,
+                        date.day,
+                      );
+
+                      final count =
+                          contributions[
+                                  key] ??
+                              0;
+
+                      return Container(
+                        width: 10,
+                        height: 10,
+                        margin:
+                            const EdgeInsets
+                                .only(
+                          bottom: 3,
+                        ),
+
+                        decoration:
+                            BoxDecoration(
+                          color:
+                              _githubContributionColor(
+                            count,
+                          ),
+
+                          borderRadius:
+                              BorderRadius
+                                  .circular(
+                            2,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _githubContributionColor(
+    int count,
+  ) {
+    if (count == 0) {
+      return Colors.white10;
+    }
+
+    if (count <= 2) {
+      return const Color(
+        0xff355C47,
+      );
+    }
+
+    if (count <= 5) {
+      return const Color(
+        0xff3E8F63,
+      );
+    }
+
+    if (count <= 9) {
+      return const Color(
+        0xff52B878,
+      );
+    }
+
+    return const Color(
+      0xff6EE7A2,
+    );
+  }
+
   Widget _buildLeetcodeCard(
-    dynamic leetcode,
+    LeetcodeLiveData? leetcode,
     bool loading,
   ) {
-    if (loading && leetcode == null) {
+    if (loading &&
+        leetcode == null) {
       return _buildLoadingCard();
     }
 
     if (leetcode == null) {
       return _buildEmptyCard(
-        icon: Icons.terminal,
+        icon:
+            Icons.terminal,
         title:
             "NO LEETCODE PROFILE",
         subtitle:
-            "Connect your LeetCode profile to track your progress.",
+            "Link a LeetCode username from your developer profile.",
       );
     }
 
     return Container(
-      width: double.infinity,
+      width:
+          double.infinity,
+
       padding:
-          const EdgeInsets.all(18),
+          const EdgeInsets.all(
+        18,
+      ),
 
       decoration:
           BoxDecoration(
         color:
-            const Color(0xff1A1A1E),
+            const Color(
+          0xff1A1A1E,
+        ),
+
         borderRadius:
-            BorderRadius.circular(16),
+            BorderRadius.circular(
+          16,
+        ),
+
         border:
             Border.all(
           color:
@@ -802,61 +1092,88 @@ class _DashboardScreenState
         children: [
           Row(
             children: [
-              Container(
-                width: 45,
-                height: 45,
+              CircleAvatar(
+                radius: 27,
 
-                decoration:
-                    BoxDecoration(
-                  color:
-                      const Color(
-                    0xffFF8BA7,
-                  ).withOpacity(.10),
-                  borderRadius:
-                      BorderRadius.circular(
-                    11,
-                  ),
-                ),
+                backgroundColor:
+                    const Color(
+                  0xffFF8BA7,
+                ).withOpacity(.1),
 
-                child: const Icon(
-                  Icons.terminal,
-                  color:
-                      Color(0xffFF8BA7),
-                ),
+                backgroundImage:
+                    leetcode.avatarUrl ==
+                            null ||
+                        leetcode
+                            .avatarUrl!
+                            .isEmpty
+                        ? null
+                        : NetworkImage(
+                            leetcode
+                                .avatarUrl!,
+                          ),
+
+                child:
+                    leetcode.avatarUrl ==
+                                null ||
+                            leetcode
+                                .avatarUrl!
+                                .isEmpty
+                        ? const Icon(
+                            Icons.person,
+                            color:
+                                Color(
+                              0xffFF8BA7,
+                            ),
+                          )
+                        : null,
               ),
 
               const SizedBox(
                 width: 12,
               ),
 
-              Text(
-                leetcode.username,
-                style:
-                    GoogleFonts.pressStart2p(
-                  color:
-                      Colors.white,
-                  fontSize: 11,
+              Expanded(
+                child: Text(
+                  leetcode.username,
+
+                  maxLines: 1,
+
+                  overflow:
+                      TextOverflow.ellipsis,
+
+                  style:
+                      GoogleFonts.pressStart2p(
+                    color:
+                        Colors.white,
+                    fontSize: 11,
+                  ),
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(
+            height: 20,
+          ),
 
           _buildStat(
             "TOTAL SOLVED",
-            "${leetcode.totalSolved ?? 0}",
-            const Color(0xffFF8BA7),
+            "${leetcode.totalSolved}",
+            const Color(
+              0xffFF8BA7,
+            ),
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(
+            height: 18,
+          ),
 
           Row(
             children: [
               Expanded(
                 child: _buildStat(
                   "EASY",
-                  "${leetcode.easySolved ?? 0}",
+                  "${leetcode.easySolved}",
                   const Color(
                     0xff6EE7A2,
                   ),
@@ -868,7 +1185,7 @@ class _DashboardScreenState
               Expanded(
                 child: _buildStat(
                   "MEDIUM",
-                  "${leetcode.mediumSolved ?? 0}",
+                  "${leetcode.mediumSolved}",
                   const Color(
                     0xffF3C86A,
                   ),
@@ -880,7 +1197,7 @@ class _DashboardScreenState
               Expanded(
                 child: _buildStat(
                   "HARD",
-                  "${leetcode.hardSolved ?? 0}",
+                  "${leetcode.hardSolved}",
                   const Color(
                     0xffFF6B6B,
                   ),
@@ -889,12 +1206,16 @@ class _DashboardScreenState
             ],
           ),
 
-          if (leetcode.contestRatings !=
+          if (leetcode.contestRating !=
               null) ...[
-            const SizedBox(height: 18),
+            const SizedBox(
+              height: 18,
+            ),
 
             Container(
-              width: double.infinity,
+              width:
+                  double.infinity,
+
               padding:
                   const EdgeInsets.all(
                 13,
@@ -915,9 +1236,14 @@ class _DashboardScreenState
               child: Row(
                 children: [
                   const Icon(
-                    Icons.emoji_events_outlined,
+                    Icons
+                        .emoji_events_outlined,
+
                     color:
-                        Color(0xffF3C86A),
+                        Color(
+                      0xffF3C86A,
+                    ),
+
                     size: 19,
                   ),
 
@@ -927,8 +1253,10 @@ class _DashboardScreenState
 
                   Text(
                     "CONTEST RATING",
+
                     style:
-                        GoogleFonts.jetBrainsMono(
+                        GoogleFonts
+                            .jetBrainsMono(
                       color:
                           Colors.white38,
                       fontSize: 10,
@@ -938,9 +1266,15 @@ class _DashboardScreenState
                   const Spacer(),
 
                   Text(
-                    "${leetcode.contestRatings}",
+                    leetcode
+                        .contestRating!
+                        .toStringAsFixed(
+                          0,
+                        ),
+
                     style:
-                        GoogleFonts.jetBrainsMono(
+                        GoogleFonts
+                            .jetBrainsMono(
                       color:
                           Colors.white,
                       fontSize: 12,
@@ -952,8 +1286,178 @@ class _DashboardScreenState
               ),
             ),
           ],
+
+          const SizedBox(
+            height: 20,
+          ),
+
+          Text(
+            "SUBMISSIONS",
+
+            style:
+                GoogleFonts.jetBrainsMono(
+              color:
+                  Colors.white38,
+              fontSize: 10,
+              fontWeight:
+                  FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(
+            height: 10,
+          ),
+
+          _buildLeetcodeHeatmap(
+            leetcode.submissions,
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLeetcodeHeatmap(
+    Map<DateTime, int> submissions,
+  ) {
+    final today =
+        DateTime.now();
+
+    final end = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    );
+
+    final start = end.subtract(
+      const Duration(
+        days: 364,
+      ),
+    );
+
+    return SizedBox(
+      height: 135,
+
+      child: SingleChildScrollView(
+        scrollDirection:
+            Axis.horizontal,
+
+        child: Row(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+
+          children:
+              List.generate(
+            53,
+            (week) {
+              return Padding(
+                padding:
+                    const EdgeInsets
+                        .only(
+                  right: 3,
+                ),
+
+                child: Column(
+                  children:
+                      List.generate(
+                    7,
+                    (day) {
+                      final date =
+                          start.add(
+                        Duration(
+                          days:
+                              week *
+                                      7 +
+                                  day,
+                        ),
+                      );
+
+                      if (date.isAfter(
+                        end,
+                      )) {
+                        return Container(
+                          width: 10,
+                          height: 10,
+                          margin:
+                              const EdgeInsets
+                                  .only(
+                            bottom: 3,
+                          ),
+                        );
+                      }
+
+                      final key =
+                          DateTime(
+                        date.year,
+                        date.month,
+                        date.day,
+                      );
+
+                      final count =
+                          submissions[
+                                  key] ??
+                              0;
+
+                      return Container(
+                        width: 10,
+                        height: 10,
+                        margin:
+                            const EdgeInsets
+                                .only(
+                          bottom: 3,
+                        ),
+
+                        decoration:
+                            BoxDecoration(
+                          color:
+                              _leetcodeSubmissionColor(
+                            count,
+                          ),
+
+                          borderRadius:
+                              BorderRadius
+                                  .circular(
+                            2,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _leetcodeSubmissionColor(
+    int count,
+  ) {
+    if (count == 0) {
+      return Colors.white10;
+    }
+
+    if (count <= 2) {
+      return const Color(
+        0xff6B3546,
+      );
+    }
+
+    if (count <= 5) {
+      return const Color(
+        0xffA94E69,
+      );
+    }
+
+    if (count <= 9) {
+      return const Color(
+        0xffD86788,
+      );
+    }
+
+    return const Color(
+      0xffFF8BA7,
     );
   }
 
@@ -968,16 +1472,26 @@ class _DashboardScreenState
             : completed / total;
 
     return Container(
-      width: double.infinity,
+      width:
+          double.infinity,
+
       padding:
-          const EdgeInsets.all(18),
+          const EdgeInsets.all(
+        18,
+      ),
 
       decoration:
           BoxDecoration(
         color:
-            const Color(0xff1A1A1E),
+            const Color(
+          0xff1A1A1E,
+        ),
+
         borderRadius:
-            BorderRadius.circular(16),
+            BorderRadius.circular(
+          16,
+        ),
+
         border:
             Border.all(
           color:
@@ -1024,7 +1538,9 @@ class _DashboardScreenState
             ],
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(
+            height: 20,
+          ),
 
           Text(
             "PROJECT COMPLETION",
@@ -1038,7 +1554,9 @@ class _DashboardScreenState
             ),
           ),
 
-          const SizedBox(height: 9),
+          const SizedBox(
+            height: 9,
+          ),
 
           _buildProgressBar(
             progress,
@@ -1047,7 +1565,9 @@ class _DashboardScreenState
             ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(
+            height: 8,
+          ),
 
           Text(
             "${(progress * 100).round()}% of projects completed",
@@ -1074,16 +1594,26 @@ class _DashboardScreenState
             : completed / total;
 
     return Container(
-      width: double.infinity,
+      width:
+          double.infinity,
+
       padding:
-          const EdgeInsets.all(18),
+          const EdgeInsets.all(
+        18,
+      ),
 
       decoration:
           BoxDecoration(
         color:
-            const Color(0xff1A1A1E),
+            const Color(
+          0xff1A1A1E,
+        ),
+
         borderRadius:
-            BorderRadius.circular(16),
+            BorderRadius.circular(
+          16,
+        ),
+
         border:
             Border.all(
           color:
@@ -1130,7 +1660,9 @@ class _DashboardScreenState
             ],
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(
+            height: 20,
+          ),
 
           Text(
             "GOAL COMPLETION",
@@ -1144,7 +1676,9 @@ class _DashboardScreenState
             ),
           ),
 
-          const SizedBox(height: 9),
+          const SizedBox(
+            height: 9,
+          ),
 
           _buildProgressBar(
             progress,
@@ -1153,7 +1687,9 @@ class _DashboardScreenState
             ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(
+            height: 8,
+          ),
 
           Text(
             "${(progress * 100).round()}% of goals completed",
@@ -1180,16 +1716,26 @@ class _DashboardScreenState
                 totalTasks;
 
     return Container(
-      width: double.infinity,
+      width:
+          double.infinity,
+
       padding:
-          const EdgeInsets.all(18),
+          const EdgeInsets.all(
+        18,
+      ),
 
       decoration:
           BoxDecoration(
         color:
-            const Color(0xff1A1A1E),
+            const Color(
+          0xff1A1A1E,
+        ),
+
         borderRadius:
-            BorderRadius.circular(16),
+            BorderRadius.circular(
+          16,
+        ),
+
         border:
             Border.all(
           color:
@@ -1207,9 +1753,12 @@ class _DashboardScreenState
           Row(
             children: [
               const Icon(
-                Icons.checklist_outlined,
+                Icons
+                    .checklist_outlined,
                 color:
-                    Color(0xff64D8FF),
+                    Color(
+                  0xff64D8FF,
+                ),
                 size: 25,
               ),
 
@@ -1243,7 +1792,9 @@ class _DashboardScreenState
             ],
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(
+            height: 18,
+          ),
 
           _buildProgressBar(
             progress,
@@ -1252,12 +1803,15 @@ class _DashboardScreenState
             ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(
+            height: 8,
+          ),
 
           Text(
             totalTasks == 0
                 ? "No tasks yet."
                 : "${(progress * 100).round()}% completed",
+
             style:
                 GoogleFonts.jetBrainsMono(
               color:
@@ -1272,16 +1826,26 @@ class _DashboardScreenState
 
   Widget _buildTechStackCard() {
     return Container(
-      width: double.infinity,
+      width:
+          double.infinity,
+
       padding:
-          const EdgeInsets.all(18),
+          const EdgeInsets.all(
+        18,
+      ),
 
       decoration:
           BoxDecoration(
         color:
-            const Color(0xff1A1A1E),
+            const Color(
+          0xff1A1A1E,
+        ),
+
         borderRadius:
-            BorderRadius.circular(16),
+            BorderRadius.circular(
+          16,
+        ),
+
         border:
             Border.all(
           color:
@@ -1319,7 +1883,8 @@ class _DashboardScreenState
                     ).withOpacity(.07),
 
                     borderRadius:
-                        BorderRadius.circular(
+                        BorderRadius
+                            .circular(
                       8,
                     ),
 
@@ -1328,7 +1893,9 @@ class _DashboardScreenState
                       color:
                           const Color(
                         0xff64D8FF,
-                      ).withOpacity(.20),
+                      ).withOpacity(
+                        .20,
+                      ),
                     ),
                   ),
 
@@ -1374,7 +1941,9 @@ class _DashboardScreenState
             ).toList(),
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(
+            height: 14,
+          ),
 
           GestureDetector(
             onTap: () {
@@ -1456,12 +2025,15 @@ class _DashboardScreenState
           ),
 
           if (_addingTechnology) ...[
-            const SizedBox(height: 12),
+            const SizedBox(
+              height: 12,
+            ),
 
             Row(
               children: [
                 Expanded(
-                  child: Autocomplete<String>(
+                  child:
+                      Autocomplete<String>(
                     optionsBuilder:
                         (textEditingValue) {
                       final query =
@@ -1495,11 +2067,16 @@ class _DashboardScreenState
                       );
                     },
 
-                    onSelected: (value) {
+                    onSelected:
+                        (value) {
                       if (!_techStack
-                          .contains(value)) {
+                          .contains(
+                        value,
+                      )) {
                         setState(() {
-                          _techStack.add(value);
+                          _techStack
+                              .add(value);
+
                           _addingTechnology =
                               false;
                         });
@@ -1514,12 +2091,13 @@ class _DashboardScreenState
                       onFieldSubmitted,
                     ) {
                       _technologyController
-                        .value =
+                          .value =
                           controller.value;
 
                       return TextField(
                         controller:
                             controller,
+
                         focusNode:
                             focusNode,
 
@@ -1549,7 +2127,8 @@ class _DashboardScreenState
                             fontSize: 11,
                           ),
 
-                          filled: true,
+                          filled:
+                              true,
 
                           fillColor:
                               Colors.white
@@ -1560,7 +2139,8 @@ class _DashboardScreenState
                           border:
                               OutlineInputBorder(
                             borderRadius:
-                                BorderRadius.circular(
+                                BorderRadius
+                                    .circular(
                               9,
                             ),
                             borderSide:
@@ -1573,7 +2153,8 @@ class _DashboardScreenState
                           focusedBorder:
                               OutlineInputBorder(
                             borderRadius:
-                                BorderRadius.circular(
+                                BorderRadius
+                                    .circular(
                               9,
                             ),
                             borderSide:
@@ -1598,13 +2179,15 @@ class _DashboardScreenState
                         alignment:
                             Alignment.topLeft,
 
-                        child: Material(
+                        child:
+                            Material(
                           color:
                               const Color(
                             0xff1A1A1E,
                           ),
 
-                          elevation: 8,
+                          elevation:
+                              8,
 
                           borderRadius:
                               BorderRadius
@@ -1612,44 +2195,57 @@ class _DashboardScreenState
                             10,
                           ),
 
-                          child: ConstrainedBox(
+                          child:
+                              ConstrainedBox(
                             constraints:
                                 const BoxConstraints(
-                              maxHeight: 190,
+                              maxHeight:
+                                  190,
                             ),
 
-                            child: ListView.builder(
+                            child:
+                                ListView
+                                    .builder(
                               padding:
                                   const EdgeInsets
                                       .symmetric(
-                                vertical: 6,
+                                vertical:
+                                    6,
                               ),
 
                               itemCount:
                                   options.length,
 
                               itemBuilder:
-                                  (context, index) {
+                                  (
+                                context,
+                                index,
+                              ) {
                                 final option =
                                     options.elementAt(
                                   index,
                                 );
 
                                 return ListTile(
-                                  dense: true,
+                                  dense:
+                                      true,
 
-                                  title: Text(
+                                  title:
+                                      Text(
                                     option,
+
                                     style:
                                         GoogleFonts
                                             .jetBrainsMono(
                                       color:
                                           Colors.white70,
-                                      fontSize: 11,
+                                      fontSize:
+                                          11,
                                     ),
                                   ),
 
-                                  onTap: () {
+                                  onTap:
+                                      () {
                                     onSelected(
                                       option,
                                     );
@@ -1664,7 +2260,9 @@ class _DashboardScreenState
                   ),
                 ),
 
-                const SizedBox(width: 8),
+                const SizedBox(
+                  width: 8,
+                ),
 
                 SizedBox(
                   height: 48,
@@ -1725,26 +2323,33 @@ class _DashboardScreenState
           size: 17,
         ),
 
-        const SizedBox(width: 8),
+        const SizedBox(
+          width: 8,
+        ),
 
         Text(
           title,
           style:
               GoogleFonts.jetBrainsMono(
-            color: Colors.white,
+            color:
+                Colors.white,
             fontSize: 12,
             fontWeight:
                 FontWeight.bold,
-            letterSpacing: 1.3,
+            letterSpacing:
+                1.3,
           ),
         ),
 
-        const SizedBox(width: 12),
+        const SizedBox(
+          width: 12,
+        ),
 
         Expanded(
           child: Container(
             height: 1,
-            color: Colors.white10,
+            color:
+                Colors.white10,
           ),
         ),
       ],
@@ -1759,6 +2364,7 @@ class _DashboardScreenState
     return Column(
       crossAxisAlignment:
           CrossAxisAlignment.start,
+
       children: [
         Text(
           value,
@@ -1769,13 +2375,16 @@ class _DashboardScreenState
           ),
         ),
 
-        const SizedBox(height: 6),
+        const SizedBox(
+          height: 6,
+        ),
 
         Text(
           label,
           style:
               GoogleFonts.jetBrainsMono(
-            color: Colors.white30,
+            color:
+                Colors.white30,
             fontSize: 9,
           ),
         ),
@@ -1792,6 +2401,7 @@ class _DashboardScreenState
       child: Column(
         crossAxisAlignment:
             CrossAxisAlignment.start,
+
         children: [
           Text(
             value,
@@ -1802,13 +2412,16 @@ class _DashboardScreenState
             ),
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(
+            height: 6,
+          ),
 
           Text(
             label,
             style:
                 GoogleFonts.jetBrainsMono(
-              color: Colors.white30,
+              color:
+                  Colors.white30,
               fontSize: 9,
             ),
           ),
@@ -1825,7 +2438,8 @@ class _DashboardScreenState
           const EdgeInsets.symmetric(
         horizontal: 10,
       ),
-      color: Colors.white10,
+      color:
+          Colors.white10,
     );
   }
 
@@ -1834,7 +2448,8 @@ class _DashboardScreenState
     Color color,
   ) {
     return Row(
-      children: List.generate(
+      children:
+          List.generate(
         20,
         (index) {
           final filled =
@@ -1845,6 +2460,7 @@ class _DashboardScreenState
           return Expanded(
             child: Container(
               height: 7,
+
               margin:
                   EdgeInsets.only(
                 right:
@@ -1852,11 +2468,13 @@ class _DashboardScreenState
                         ? 0
                         : 3,
               ),
+
               decoration:
                   BoxDecoration(
                 color: filled
                     ? color
                     : Colors.white10,
+
                 borderRadius:
                     BorderRadius.circular(
                   2,
@@ -1871,18 +2489,27 @@ class _DashboardScreenState
 
   Widget _buildLoadingCard() {
     return Container(
-      width: double.infinity,
-      height: 130,
+      width:
+          double.infinity,
+
+      height: 140,
 
       decoration:
           BoxDecoration(
         color:
-            const Color(0xff1A1A1E),
+            const Color(
+          0xff1A1A1E,
+        ),
+
         borderRadius:
-            BorderRadius.circular(16),
+            BorderRadius.circular(
+          16,
+        ),
+
         border:
             Border.all(
-          color: Colors.white10,
+          color:
+              Colors.white10,
         ),
       ),
 
@@ -1903,26 +2530,35 @@ class _DashboardScreenState
     required String subtitle,
   }) {
     return Container(
-      width: double.infinity,
+      width:
+          double.infinity,
+
       padding:
-          const EdgeInsets.all(18),
+          const EdgeInsets.all(
+        18,
+      ),
 
       decoration:
           BoxDecoration(
         color:
-            const Color(0xff1A1A1E),
+            const Color(
+          0xff1A1A1E,
+        ),
+
         borderRadius:
-            BorderRadius.circular(16),
+            BorderRadius.circular(
+          16,
+        ),
+
         border:
             Border.all(
-          color: Colors.white10,
+          color:
+              Colors.white10,
         ),
       ),
 
       child: Row(
         children: [
-          const SizedBox(width: 4),
-
           Icon(
             icon,
             color:
@@ -1930,12 +2566,15 @@ class _DashboardScreenState
             size: 30,
           ),
 
-          const SizedBox(width: 14),
+          const SizedBox(
+            width: 14,
+          ),
 
           Expanded(
             child: Column(
               crossAxisAlignment:
                   CrossAxisAlignment.start,
+
               children: [
                 Text(
                   title,
@@ -1947,7 +2586,9 @@ class _DashboardScreenState
                   ),
                 ),
 
-                const SizedBox(height: 8),
+                const SizedBox(
+                  height: 8,
+                ),
 
                 Text(
                   subtitle,

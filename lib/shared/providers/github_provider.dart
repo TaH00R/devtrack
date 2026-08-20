@@ -1,3 +1,4 @@
+import 'package:devtrack/shared/models/github_live_data.dart';
 import 'package:devtrack/shared/models/github_profile.dart';
 import 'package:devtrack/shared/repositories/github_repository.dart';
 import 'package:flutter/foundation.dart';
@@ -9,11 +10,21 @@ class GithubProvider extends ChangeNotifier {
 
   List<GithubProfile> _profiles = [];
 
+  GithubLiveData? _liveData;
+
   bool _isLoading = false;
+  bool _isLiveLoading = false;
+
   String? _error;
 
   List<GithubProfile> get profiles => _profiles;
+
+  GithubLiveData? get liveData => _liveData;
+
   bool get isLoading => _isLoading;
+
+  bool get isLiveLoading => _isLiveLoading;
+
   String? get error => _error;
 
   Future<void> getProfiles() async {
@@ -22,7 +33,14 @@ class GithubProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _profiles = await _githubRepository.getProfiles();
+      _profiles =
+          await _githubRepository.getProfiles();
+
+      if (_profiles.isNotEmpty) {
+        await getLiveData(
+          _profiles.first.username,
+        );
+      }
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -31,18 +49,39 @@ class GithubProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> getLiveData(
+    String username,
+  ) async {
+    _isLiveLoading = true;
+    notifyListeners();
+
+    try {
+      _liveData =
+          await _githubRepository
+              .getLiveData(username);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLiveLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> createProfile(
-    GithubProfile profile,
+    String username,
   ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final createdProfile =
-          await _githubRepository.createProfile(profile);
+      final profile =
+          await _githubRepository
+              .createProfile(username);
 
-      _profiles.add(createdProfile);
+      _profiles.add(profile);
+
+      await getLiveData(username);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -60,19 +99,26 @@ class GithubProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final updatedProfile =
-          await _githubRepository.updateProfile(
+      final updated =
+          await _githubRepository
+              .updateProfile(
         profileId,
         profile,
       );
 
-      final index = _profiles.indexWhere(
-        (profile) => profile.id == profileId,
+      final index =
+          _profiles.indexWhere(
+        (item) =>
+            item.id == profileId,
       );
 
       if (index != -1) {
-        _profiles[index] = updatedProfile;
+        _profiles[index] = updated;
       }
+
+      await getLiveData(
+        updated.username,
+      );
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -81,17 +127,23 @@ class GithubProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteProfile(int profileId) async {
+  Future<void> deleteProfile(
+    int profileId,
+  ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      await _githubRepository.deleteProfile(profileId);
+      await _githubRepository
+          .deleteProfile(profileId);
 
       _profiles.removeWhere(
-        (profile) => profile.id == profileId,
+        (profile) =>
+            profile.id == profileId,
       );
+
+      _liveData = null;
     } catch (e) {
       _error = e.toString();
     } finally {

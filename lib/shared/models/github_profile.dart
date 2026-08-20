@@ -6,20 +6,27 @@ part 'github_profile.g.dart';
 class GithubProfile {
   final int id;
   final String username;
+
+  final String? avatarUrl;
   final String? profileUrl;
+
   final int? publicRepos;
   final int? followers;
 
   GithubProfile({
     required this.id,
     required this.username,
+    this.avatarUrl,
     this.profileUrl,
     this.publicRepos,
     this.followers,
   });
 
-  factory GithubProfile.fromJson(Map<String, dynamic> json) =>
+  factory GithubProfile.fromJson(
+    Map<String, dynamic> json,
+  ) =>
       _$GithubProfileFromJson(json);
 
-  Map<String, dynamic> toJson() => _$GithubProfileToJson(this);
+  Map<String, dynamic> toJson() =>
+      _$GithubProfileToJson(this);
 }

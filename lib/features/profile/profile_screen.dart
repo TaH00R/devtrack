@@ -59,9 +59,13 @@ class _DeveloperProfileScreenState
     await Future.wait([
       if (userId != null)
         context.read<UserProvider>().getUser(userId),
+
       context.read<TagProvider>().getTags(),
+
       context.read<TaskProvider>().getTasks(),
+
       context.read<GithubProvider>().getProfiles(),
+
       context.read<LeetcodeProvider>().getProfiles(),
     ]);
 
@@ -70,10 +74,10 @@ class _DeveloperProfileScreenState
     final user =
         context.read<UserProvider>().user;
 
-    final github =
+    final githubProfiles =
         context.read<GithubProvider>().profiles;
 
-    final leetcode =
+    final leetcodeProfiles =
         context.read<LeetcodeProvider>().profiles;
 
     _displayNameController.text =
@@ -81,14 +85,14 @@ class _DeveloperProfileScreenState
         user?.userName ??
         '';
 
-    if (github.isNotEmpty) {
+    if (githubProfiles.isNotEmpty) {
       _githubController.text =
-          github.first.username;
+          githubProfiles.first.username;
     }
 
-    if (leetcode.isNotEmpty) {
+    if (leetcodeProfiles.isNotEmpty) {
       _leetcodeController.text =
-          leetcode.first.username;
+          leetcodeProfiles.first.username;
     }
 
     setState(() {});
@@ -100,6 +104,7 @@ class _DeveloperProfileScreenState
     _githubController.dispose();
     _leetcodeController.dispose();
     _tagController.dispose();
+
     super.dispose();
   }
 
@@ -149,7 +154,9 @@ class _DeveloperProfileScreenState
     });
 
     if (provider.error != null) {
-      _showError(provider.error!);
+      _showError(
+        provider.error!,
+      );
       return;
     }
 
@@ -187,7 +194,9 @@ class _DeveloperProfileScreenState
     if (!mounted) return;
 
     if (provider.error != null) {
-      _showError(provider.error!);
+      _showError(
+        provider.error!,
+      );
       return;
     }
 
@@ -198,7 +207,9 @@ class _DeveloperProfileScreenState
     });
   }
 
-  Future<void> _deleteTag(Tag tag) async {
+  Future<void> _deleteTag(
+    Tag tag,
+  ) async {
     if (_isTagUsed(tag.id)) {
       _showError(
         'This tag is linked to a task and cannot be removed.',
@@ -214,12 +225,16 @@ class _DeveloperProfileScreenState
     final provider =
         context.read<TagProvider>();
 
-    await provider.deleteTag(tag.id);
+    await provider.deleteTag(
+      tag.id,
+    );
 
     if (!mounted) return;
 
     if (provider.error != null) {
-      _showError(provider.error!);
+      _showError(
+        provider.error!,
+      );
     }
   }
 
@@ -273,6 +288,7 @@ class _DeveloperProfileScreenState
                 ),
               ),
             ),
+
             TextButton(
               onPressed: () {
                 Navigator.pop(
@@ -336,6 +352,8 @@ class _DeveloperProfileScreenState
           username: username,
           profileUrl:
               existing.profileUrl,
+          avatarUrl:
+              existing.avatarUrl,
           publicRepos:
               existing.publicRepos,
           followers:
@@ -358,7 +376,9 @@ class _DeveloperProfileScreenState
     if (!mounted) return;
 
     if (provider.error != null) {
-      _showError(provider.error!);
+      _showError(
+        provider.error!,
+      );
     }
   }
 
@@ -425,7 +445,9 @@ class _DeveloperProfileScreenState
     if (!mounted) return;
 
     if (provider.error != null) {
-      _showError(provider.error!);
+      _showError(
+        provider.error!,
+      );
     }
   }
 
@@ -447,15 +469,21 @@ class _DeveloperProfileScreenState
     final leetcodeProvider =
         context.watch<LeetcodeProvider>();
 
-    final github =
+    final githubProfile =
         githubProvider.profiles.isNotEmpty
             ? githubProvider.profiles.first
             : null;
 
-    final leetcode =
+    final leetcodeProfile =
         leetcodeProvider.profiles.isNotEmpty
             ? leetcodeProvider.profiles.first
             : null;
+
+    final github =
+        githubProvider.liveData;
+
+    final leetcode =
+        leetcodeProvider.liveData;
 
     return Scaffold(
       backgroundColor:
@@ -469,6 +497,7 @@ class _DeveloperProfileScreenState
         leading: IconButton(
           onPressed: () =>
               Navigator.pop(context),
+
           icon: const Icon(
             Icons.arrow_back,
             color:
@@ -567,8 +596,9 @@ class _DeveloperProfileScreenState
               ),
 
               _buildGithubCard(
+                githubProfile,
                 github,
-                githubProvider.isLoading,
+                githubProvider.isLiveLoading,
               ),
 
               const SizedBox(
@@ -588,8 +618,9 @@ class _DeveloperProfileScreenState
               ),
 
               _buildLeetcodeCard(
+                leetcodeProfile,
                 leetcode,
-                leetcodeProvider.isLoading,
+                leetcodeProvider.isLiveLoading,
               ),
 
               const SizedBox(
@@ -622,6 +653,7 @@ class _DeveloperProfileScreenState
     return Column(
       crossAxisAlignment:
           CrossAxisAlignment.start,
+
       children: [
         Text(
           'DEVELOPER',
@@ -647,6 +679,7 @@ class _DeveloperProfileScreenState
           maxLines: 2,
           overflow:
               TextOverflow.ellipsis,
+
           style:
               GoogleFonts.pressStart2p(
             color:
@@ -665,14 +698,17 @@ class _DeveloperProfileScreenState
       child: Column(
         crossAxisAlignment:
             CrossAxisAlignment.start,
+
         children: [
           Row(
             crossAxisAlignment:
                 CrossAxisAlignment.start,
+
             children: [
               Expanded(
                 child: _field(
                   'DISPLAY NAME',
+
                   user?.displayName ??
                       user?.userName ??
                       'USER',
@@ -695,15 +731,17 @@ class _DeveloperProfileScreenState
                                   true;
                             });
                           },
+
                 icon: Icon(
                   _editingDisplayName
                       ? Icons.check
-                      : Icons
-                          .edit_outlined,
+                      : Icons.edit_outlined,
+
                   color:
                       const Color(
                     0xffB388FF,
                   ),
+
                   size: 20,
                 ),
               ),
@@ -718,18 +756,22 @@ class _DeveloperProfileScreenState
             TextField(
               controller:
                   _displayNameController,
+
               enabled:
                   !_savingDisplayName,
+
               style:
                   GoogleFonts.jetBrainsMono(
                 color:
                     Colors.white,
                 fontSize: 12,
               ),
+
               cursorColor:
                   const Color(
                 0xffB388FF,
               ),
+
               decoration:
                   _inputDecoration(
                 'Display name',
@@ -738,7 +780,8 @@ class _DeveloperProfileScreenState
           ],
 
           const Divider(
-            color: Colors.white10,
+            color:
+                Colors.white10,
             height: 28,
           ),
 
@@ -769,6 +812,7 @@ class _DeveloperProfileScreenState
       child: Column(
         crossAxisAlignment:
             CrossAxisAlignment.start,
+
         children: [
           if (provider.isLoading)
             const Center(
@@ -793,11 +837,14 @@ class _DeveloperProfileScreenState
             Wrap(
               spacing: 8,
               runSpacing: 8,
+
               children:
                   provider.tags.map(
                 (tag) {
                   final used =
-                      _isTagUsed(tag.id);
+                      _isTagUsed(
+                    tag.id,
+                  );
 
                   return Container(
                     padding:
@@ -806,6 +853,7 @@ class _DeveloperProfileScreenState
                       horizontal: 11,
                       vertical: 9,
                     ),
+
                     decoration:
                         BoxDecoration(
                       color: used
@@ -814,10 +862,12 @@ class _DeveloperProfileScreenState
                             ).withOpacity(.08)
                           : Colors.white
                               .withOpacity(.04),
+
                       borderRadius:
                           BorderRadius.circular(
                         8,
                       ),
+
                       border:
                           Border.all(
                         color: used
@@ -827,21 +877,23 @@ class _DeveloperProfileScreenState
                             : Colors.white10,
                       ),
                     ),
+
                     child: Row(
                       mainAxisSize:
                           MainAxisSize.min,
+
                       children: [
                         Icon(
                           used
-                              ? Icons
-                                  .lock_outline
-                              : Icons
-                                  .label_outline,
+                              ? Icons.lock_outline
+                              : Icons.label_outline,
+
                           color: used
                               ? const Color(
                                   0xffF3C86A,
                                 )
                               : Colors.white38,
+
                           size: 14,
                         ),
 
@@ -851,8 +903,10 @@ class _DeveloperProfileScreenState
 
                         Text(
                           tag.name,
+
                           style:
-                              GoogleFonts.jetBrainsMono(
+                              GoogleFonts
+                                  .jetBrainsMono(
                             color:
                                 Colors.white70,
                             fontSize: 10,
@@ -870,15 +924,17 @@ class _DeveloperProfileScreenState
                                   _deleteTag(
                                 tag,
                               ),
+
                           child:
                               Icon(
                             Icons.close,
+
                             color: used
-                                ? Colors
-                                    .white12
+                                ? Colors.white12
                                 : const Color(
                                     0xffFF8BA7,
                                   ),
+
                             size: 14,
                           ),
                         ),
@@ -900,19 +956,24 @@ class _DeveloperProfileScreenState
                   child: TextField(
                     controller:
                         _tagController,
+
                     autofocus: true,
+
                     onSubmitted:
                         (_) => _createTag(),
+
                     style:
                         GoogleFonts.jetBrainsMono(
                       color:
                           Colors.white,
                       fontSize: 12,
                     ),
+
                     cursorColor:
                         const Color(
                       0xffF3C86A,
                     ),
+
                     decoration:
                         _inputDecoration(
                       'New tag name',
@@ -926,10 +987,12 @@ class _DeveloperProfileScreenState
 
                 SizedBox(
                   height: 48,
+
                   child:
                       ElevatedButton(
                     onPressed:
                         _createTag,
+
                     style:
                         ElevatedButton
                             .styleFrom(
@@ -937,13 +1000,15 @@ class _DeveloperProfileScreenState
                           const Color(
                         0xffF3C86A,
                       ),
+
                       foregroundColor:
                           const Color(
                         0xff121214,
                       ),
-                      elevation:
-                          0,
+
+                      elevation: 0,
                     ),
+
                     child:
                         const Icon(
                       Icons.check,
@@ -959,6 +1024,7 @@ class _DeveloperProfileScreenState
                   _addingTag = true;
                 });
               },
+
               child: Container(
                 padding:
                     const EdgeInsets
@@ -966,16 +1032,19 @@ class _DeveloperProfileScreenState
                   horizontal: 12,
                   vertical: 9,
                 ),
+
                 decoration:
                     BoxDecoration(
                   color:
                       const Color(
                     0xffF3C86A,
                   ).withOpacity(.05),
+
                   borderRadius:
                       BorderRadius.circular(
                     8,
                   ),
+
                   border:
                       Border.all(
                     color:
@@ -984,21 +1053,23 @@ class _DeveloperProfileScreenState
                     ).withOpacity(.3),
                   ),
                 ),
+
                 child: Row(
                   mainAxisSize:
                       MainAxisSize.min,
+
                   children: [
                     const Icon(
                       Icons.add,
                       color:
-                          Color(
-                        0xffF3C86A,
-                      ),
+                          Color(0xffF3C86A),
                       size: 15,
                     ),
+
                     const SizedBox(
                       width: 5,
                     ),
+
                     Text(
                       'ADD TAG',
                       style:
@@ -1022,6 +1093,7 @@ class _DeveloperProfileScreenState
 
           Text(
             '> locked tags are currently used by a task',
+
             style:
                 GoogleFonts.jetBrainsMono(
               color:
@@ -1036,34 +1108,67 @@ class _DeveloperProfileScreenState
 
   Widget _buildGithubCard(
     GithubProfile? profile,
+    dynamic liveData,
     bool loading,
   ) {
     return _card(
       child: Column(
         crossAxisAlignment:
             CrossAxisAlignment.start,
+
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.code,
-                color:
-                    Color(0xffB388FF),
+              CircleAvatar(
+                radius: 24,
+
+                backgroundColor:
+                    const Color(
+                  0xffB388FF,
+                ).withOpacity(.10),
+
+                backgroundImage:
+                    liveData != null &&
+                            liveData.avatarUrl
+                                .toString()
+                                .isNotEmpty
+                        ? NetworkImage(
+                            liveData.avatarUrl
+                                .toString(),
+                          )
+                        : null,
+
+                child:
+                    liveData == null ||
+                            liveData.avatarUrl
+                                .toString()
+                                .isEmpty
+                        ? const Icon(
+                            Icons.code,
+                            color:
+                                Color(
+                              0xffB388FF,
+                            ),
+                          )
+                        : null,
               ),
 
               const SizedBox(
-                width: 9,
+                width: 12,
               ),
 
-              Text(
-                profile == null
-                    ? 'LINK GITHUB'
-                    : 'CONNECTED',
-                style:
-                    GoogleFonts.pressStart2p(
-                  color:
-                      Colors.white,
-                  fontSize: 10,
+              Expanded(
+                child: Text(
+                  profile == null
+                      ? 'LINK GITHUB'
+                      : '@${profile.username}',
+
+                  style:
+                      GoogleFonts.pressStart2p(
+                    color:
+                        Colors.white,
+                    fontSize: 10,
+                  ),
                 ),
               ),
             ],
@@ -1076,16 +1181,19 @@ class _DeveloperProfileScreenState
           TextField(
             controller:
                 _githubController,
+
             decoration:
                 _inputDecoration(
               'GitHub username',
             ),
+
             style:
                 GoogleFonts.jetBrainsMono(
               color:
                   Colors.white,
               fontSize: 12,
             ),
+
             cursorColor:
                 const Color(
               0xffB388FF,
@@ -1099,7 +1207,9 @@ class _DeveloperProfileScreenState
           SizedBox(
             width:
                 double.infinity,
+
             height: 46,
+
             child:
                 ElevatedButton(
               onPressed:
@@ -1107,6 +1217,7 @@ class _DeveloperProfileScreenState
                           loading
                       ? null
                       : _saveGithub,
+
               style:
                   ElevatedButton
                       .styleFrom(
@@ -1114,19 +1225,22 @@ class _DeveloperProfileScreenState
                     const Color(
                   0xffB388FF,
                 ),
+
                 foregroundColor:
                     Colors.white,
+
                 elevation: 0,
               ),
+
               child:
                   _linkingGithub
                       ? const SizedBox(
                           width: 18,
                           height: 18,
+
                           child:
                               CircularProgressIndicator(
-                            strokeWidth:
-                                2,
+                            strokeWidth: 2,
                             color:
                                 Colors.white,
                           ),
@@ -1135,8 +1249,10 @@ class _DeveloperProfileScreenState
                           profile == null
                               ? 'LINK GITHUB'
                               : 'UPDATE GITHUB',
-                          style: GoogleFonts
-                              .pressStart2p(
+
+                          style:
+                              GoogleFonts
+                                  .pressStart2p(
                             fontSize:
                                 10,
                           ),
@@ -1144,18 +1260,35 @@ class _DeveloperProfileScreenState
             ),
           ),
 
-          if (profile != null) ...[
+          if (liveData != null) ...[
             const SizedBox(
-              height: 10,
+              height: 14,
             ),
-            Text(
-              'Repos: ${profile.publicRepos ?? 0}   •   Followers: ${profile.followers ?? 0}',
-              style:
-                  GoogleFonts.jetBrainsMono(
-                color:
-                    Colors.white30,
-                fontSize: 10,
-              ),
+
+            Row(
+              children: [
+                Expanded(
+                  child: _buildMiniStat(
+                    'REPOS',
+                    '${liveData.publicRepos}',
+                    const Color(
+                      0xffB388FF,
+                    ),
+                  ),
+                ),
+
+                _verticalDivider(),
+
+                Expanded(
+                  child: _buildMiniStat(
+                    'FOLLOWERS',
+                    '${liveData.followers}',
+                    const Color(
+                      0xff64D8FF,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ],
@@ -1165,34 +1298,71 @@ class _DeveloperProfileScreenState
 
   Widget _buildLeetcodeCard(
     LeetcodeProfile? profile,
+    dynamic liveData,
     bool loading,
   ) {
     return _card(
       child: Column(
         crossAxisAlignment:
             CrossAxisAlignment.start,
+
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.terminal,
-                color:
-                    Color(0xffFF8BA7),
+              CircleAvatar(
+                radius: 24,
+
+                backgroundColor:
+                    const Color(
+                  0xffFF8BA7,
+                ).withOpacity(.10),
+
+                backgroundImage:
+                    liveData != null &&
+                            liveData.avatarUrl !=
+                                null &&
+                            liveData.avatarUrl
+                                .toString()
+                                .isNotEmpty
+                        ? NetworkImage(
+                            liveData.avatarUrl
+                                .toString(),
+                          )
+                        : null,
+
+                child:
+                    liveData == null ||
+                            liveData.avatarUrl ==
+                                null ||
+                            liveData.avatarUrl
+                                .toString()
+                                .isEmpty
+                        ? const Icon(
+                            Icons.terminal,
+                            color:
+                                Color(
+                              0xffFF8BA7,
+                            ),
+                          )
+                        : null,
               ),
 
               const SizedBox(
-                width: 9,
+                width: 12,
               ),
 
-              Text(
-                profile == null
-                    ? 'LINK LEETCODE'
-                    : 'CONNECTED',
-                style:
-                    GoogleFonts.pressStart2p(
-                  color:
-                      Colors.white,
-                  fontSize: 10,
+              Expanded(
+                child: Text(
+                  profile == null
+                      ? 'LINK LEETCODE'
+                      : profile.username,
+
+                  style:
+                      GoogleFonts.pressStart2p(
+                    color:
+                        Colors.white,
+                    fontSize: 10,
+                  ),
                 ),
               ),
             ],
@@ -1205,16 +1375,19 @@ class _DeveloperProfileScreenState
           TextField(
             controller:
                 _leetcodeController,
+
             decoration:
                 _inputDecoration(
               'LeetCode username',
             ),
+
             style:
                 GoogleFonts.jetBrainsMono(
               color:
                   Colors.white,
               fontSize: 12,
             ),
+
             cursorColor:
                 const Color(
               0xffFF8BA7,
@@ -1228,7 +1401,9 @@ class _DeveloperProfileScreenState
           SizedBox(
             width:
                 double.infinity,
+
             height: 46,
+
             child:
                 ElevatedButton(
               onPressed:
@@ -1236,6 +1411,7 @@ class _DeveloperProfileScreenState
                           loading
                       ? null
                       : _saveLeetcode,
+
               style:
                   ElevatedButton
                       .styleFrom(
@@ -1243,21 +1419,24 @@ class _DeveloperProfileScreenState
                     const Color(
                   0xffFF8BA7,
                 ),
+
                 foregroundColor:
                     const Color(
                   0xff121214,
                 ),
+
                 elevation: 0,
               ),
+
               child:
                   _linkingLeetcode
                       ? const SizedBox(
                           width: 18,
                           height: 18,
+
                           child:
                               CircularProgressIndicator(
-                            strokeWidth:
-                                2,
+                            strokeWidth: 2,
                             color:
                                 Color(
                               0xff121214,
@@ -1268,8 +1447,10 @@ class _DeveloperProfileScreenState
                           profile == null
                               ? 'LINK LEETCODE'
                               : 'UPDATE LEETCODE',
-                          style: GoogleFonts
-                              .pressStart2p(
+
+                          style:
+                              GoogleFonts
+                                  .pressStart2p(
                             fontSize:
                                 10,
                           ),
@@ -1277,22 +1458,85 @@ class _DeveloperProfileScreenState
             ),
           ),
 
-          if (profile != null) ...[
+          if (liveData != null) ...[
             const SizedBox(
-              height: 10,
+              height: 14,
             ),
-            Text(
-              'Solved: ${profile.totalSolved ?? 0}   •   Rating: ${profile.contestRatings ?? 0}',
-              style:
-                  GoogleFonts.jetBrainsMono(
-                color:
-                    Colors.white30,
-                fontSize: 10,
-              ),
+
+            Row(
+              children: [
+                Expanded(
+                  child:
+                      _buildMiniStat(
+                    'SOLVED',
+                    '${liveData.totalSolved}',
+                    const Color(
+                      0xffFF8BA7,
+                    ),
+                  ),
+                ),
+
+                _verticalDivider(),
+
+                Expanded(
+                  child:
+                      _buildMiniStat(
+                    'RATING',
+                    liveData.contestRating ==
+                            null
+                        ? '--'
+                        : liveData
+                            .contestRating!
+                            .toStringAsFixed(
+                              0,
+                            ),
+                    const Color(
+                      0xffF3C86A,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ],
       ),
+    );
+  }
+
+  Widget _buildMiniStat(
+    String label,
+    String value,
+    Color color,
+  ) {
+    return Column(
+      crossAxisAlignment:
+          CrossAxisAlignment.start,
+
+      children: [
+        Text(
+          value,
+          style:
+              GoogleFonts.pressStart2p(
+            color:
+                color,
+            fontSize: 13,
+          ),
+        ),
+
+        const SizedBox(
+          height: 5,
+        ),
+
+        Text(
+          label,
+          style:
+              GoogleFonts.jetBrainsMono(
+            color:
+                Colors.white30,
+            fontSize: 8,
+          ),
+        ),
+      ],
     );
   }
 
@@ -1301,12 +1545,14 @@ class _DeveloperProfileScreenState
       child: ListTile(
         contentPadding:
             EdgeInsets.zero,
+
         leading:
             const Icon(
           Icons.logout,
           color:
               Color(0xffFF8BA7),
         ),
+
         title:
             Text(
           'LOGOUT',
@@ -1317,7 +1563,9 @@ class _DeveloperProfileScreenState
             fontSize: 11,
           ),
         ),
-        onTap: _logout,
+
+        onTap:
+            _logout,
       ),
     );
   }
@@ -1329,21 +1577,12 @@ class _DeveloperProfileScreenState
 
     if (!mounted) return;
 
-    Navigator.of(context).popUntil(
-      (route) => route.isFirst,
+    Navigator.of(context)
+        .popUntil(
+      (route) =>
+          route.isFirst,
     );
   }
-
-  // bool _isTagUsed(int id) {
-  //   final tasks =
-  //       context.read<TaskProvider>().tasks;
-
-  //   return tasks.any(
-  //     (task) =>
-  //         task.tagIds?.contains(id) ??
-  //         false,
-  //   );
-  // }
 
   Widget _sectionTitle(
     String title,
@@ -1354,7 +1593,8 @@ class _DeveloperProfileScreenState
       children: [
         Icon(
           icon,
-          color: color,
+          color:
+              color,
           size: 17,
         ),
 
@@ -1398,25 +1638,33 @@ class _DeveloperProfileScreenState
     return Container(
       width:
           double.infinity,
+
       padding:
           const EdgeInsets.all(
         17,
       ),
+
       decoration:
           BoxDecoration(
         color:
-            const Color(0xff1A1A1E),
+            const Color(
+          0xff1A1A1E,
+        ),
+
         borderRadius:
             BorderRadius.circular(
           14,
         ),
+
         border:
             Border.all(
           color:
               Colors.white10,
         ),
       ),
-      child: child,
+
+      child:
+          child,
     );
   }
 
@@ -1427,9 +1675,11 @@ class _DeveloperProfileScreenState
     return Column(
       crossAxisAlignment:
           CrossAxisAlignment.start,
+
       children: [
         Text(
           label,
+
           style:
               GoogleFonts.jetBrainsMono(
             color:
@@ -1446,6 +1696,7 @@ class _DeveloperProfileScreenState
 
         Text(
           value,
+
           style:
               GoogleFonts.jetBrainsMono(
             color:
@@ -1457,62 +1708,91 @@ class _DeveloperProfileScreenState
     );
   }
 
+  Widget _verticalDivider() {
+    return Container(
+      height: 35,
+
+      width: 1,
+
+      margin:
+          const EdgeInsets.symmetric(
+        horizontal: 10,
+      ),
+
+      color:
+          Colors.white10,
+    );
+  }
+
   InputDecoration _inputDecoration(
     String hint,
   ) {
     return InputDecoration(
-      hintText: hint,
+      hintText:
+          hint,
+
       hintStyle:
           GoogleFonts.jetBrainsMono(
         color:
             Colors.white24,
         fontSize: 11,
       ),
-      filled: true,
+
+      filled:
+          true,
+
       fillColor:
           Colors.white.withOpacity(
         .05,
       ),
+
       contentPadding:
-          const EdgeInsets
-              .symmetric(
+          const EdgeInsets.symmetric(
         horizontal: 14,
         vertical: 14,
       ),
+
       border:
           OutlineInputBorder(
         borderRadius:
             BorderRadius.circular(
           9,
         ),
+
         borderSide:
             const BorderSide(
           color:
               Colors.white10,
         ),
       ),
+
       enabledBorder:
           OutlineInputBorder(
         borderRadius:
             BorderRadius.circular(
           9,
         ),
+
         borderSide:
             const BorderSide(
           color:
               Colors.white10,
         ),
       ),
+
       focusedBorder:
           OutlineInputBorder(
         borderRadius:
             BorderRadius.circular(
           9,
         ),
+
         borderSide:
             const BorderSide(
           color:
-              Color(0xffB388FF),
+              Color(
+            0xffB388FF,
+          ),
         ),
       ),
     );
@@ -1530,11 +1810,13 @@ class _DeveloperProfileScreenState
         content:
             Text(
           message,
+
           style:
               GoogleFonts.jetBrainsMono(
             fontSize: 12,
           ),
         ),
+
         backgroundColor:
             const Color(
           0xff2A1A20,

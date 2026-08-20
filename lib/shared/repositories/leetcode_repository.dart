@@ -1,13 +1,29 @@
 import 'dart:convert';
 
 import 'package:devtrack/core/network/api_client.dart';
-import 'package:devtrack/shared/models/leetcode_profile.dart';
 import 'package:devtrack/shared/models/leetcode_live_data.dart';
+import 'package:devtrack/shared/models/leetcode_profile.dart';
 import 'package:dio/dio.dart';
 
 class LeetcodeRepository {
   final ApiClient _apiClient;
-  final Dio _leetcodeApi = Dio();
+
+  final Dio _leetcodeDio = Dio(
+    BaseOptions(
+      baseUrl: 'https://leetcode.com',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Origin': 'https://leetcode.com',
+        'Referer': 'https://leetcode.com/',
+        'User-Agent':
+            'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
+      },
+      validateStatus: (status) {
+        return status != null && status < 500;
+      },
+    ),
+  );
 
   LeetcodeRepository(this._apiClient);
 
@@ -18,8 +34,9 @@ class LeetcodeRepository {
 
     return (response.data as List)
         .map(
-          (profile) =>
-              LeetcodeProfile.fromJson(profile),
+          (profile) => LeetcodeProfile.fromJson(
+            Map<String, dynamic>.from(profile),
+          ),
         )
         .toList();
   }
@@ -32,7 +49,7 @@ class LeetcodeRepository {
     );
 
     return LeetcodeProfile.fromJson(
-      response.data,
+      Map<String, dynamic>.from(response.data),
     );
   }
 
@@ -42,12 +59,12 @@ class LeetcodeRepository {
     final response = await _apiClient.dio.post(
       '/api/leetcode-profile',
       data: {
-        'username': username,
+        'username': username.trim(),
       },
     );
 
     return LeetcodeProfile.fromJson(
-      response.data,
+      Map<String, dynamic>.from(response.data),
     );
   }
 
@@ -55,16 +72,13 @@ class LeetcodeRepository {
     int profileId,
     LeetcodeProfile profile,
   ) async {
-    final response =
-        await _apiClient.dio.patch(
+    final response = await _apiClient.dio.patch(
       '/api/leetcode-profile/$profileId',
-      data: {
-        'username': profile.username,
-      },
+      data: profile.toJson(),
     );
 
     return LeetcodeProfile.fromJson(
-      response.data,
+      Map<String, dynamic>.from(response.data),
     );
   }
 
@@ -76,214 +90,286 @@ class LeetcodeRepository {
     );
   }
 
-  Future<LeetcodeLiveData> getLiveData(
-    String username,
-  ) async {
-    const query = r'''
-      query getUserProfile($username: String!) {
-        matchedUser(username: $username) {
-          username
-          profile {
-            userAvatar
-          }
-          submitStats: submitStatsGlobal {
-            acSubmissionNum {
-              difficulty
-              count
-            }
-          }
-          userContestRanking {
-            rating
-          }
-          submissionCalendar
-        }
-      }
-    ''';
-
-    final response =
-        await _leetcodeApi.post(
-      'https://leetcode.com/graphql/',
-      data: {
+  Future<Map<String, dynamic>> _postQuery({
+    required String operationName,
+    required String query,
+    required Map<String, dynamic> variables,
+  }) async {
+    final response = await _leetcodeDio.post(
+      '/graphql/',
+      data: jsonEncode({
+        'operationName': operationName,
         'query': query,
-        'variables': {
-          'username': username,
-        },
-      },
-      options: Options(
-        headers: {
-          'Content-Type':
-              'application/json',
-          'Referer':
-              'https://leetcode.com/',
-        },
-      ),
+        'variables': variables,
+      }),
     );
 
-    final root =
-        Map<String, dynamic>.from(
-      response.data,
-    );
-
-    final data =
-        Map<String, dynamic>.from(
-      root['data'] ?? {},
-    );
-
-    final matchedUser =
-        data['matchedUser'];
-
-    if (matchedUser == null) {
+    if (response.statusCode != 200) {
       throw Exception(
-        'LeetCode user not found',
+        'LeetCode request failed: ${response.statusCode}\n${response.data}',
       );
     }
 
-    final user =
-        Map<String, dynamic>.from(
+    final rawData = response.data;
+
+    final Map<String, dynamic> body;
+
+    if (rawData is String) {
+      body = Map<String, dynamic>.from(
+        jsonDecode(rawData),
+      );
+    } else {
+      body = Map<String, dynamic>.from(rawData);
+    }
+
+    if (body['errors'] != null) {
+      throw Exception(
+        body['errors'].toString(),
+      );
+    }
+
+    final data = body['data'];
+
+    if (data == null) {
+      throw Exception(
+        'LeetCode returned no data.',
+      );
+    }
+
+    return Map<String, dynamic>.from(data);
+  }
+
+  Future<LeetcodeLiveData> getLiveData(
+    String username,
+  ) async {
+    final cleanUsername = username.trim();
+
+    if (cleanUsername.isEmpty) {
+      throw Exception(
+        'LeetCode username is empty.',
+      );
+    }
+
+    const profileQuery = r'''
+query getUserProfile($username: String!) {
+  matchedUser(username: $username) {
+    username
+    profile {
+      userAvatar
+    }
+    submitStats: submitStatsGlobal {
+      acSubmissionNum {
+        difficulty
+        count
+      }
+    }
+  }
+}
+''';
+
+    const contestQuery = r'''
+query userContestRankingInfo($username: String!) {
+  userContestRanking(username: $username) {
+    rating
+  }
+}
+''';
+
+    const calendarQuery = r'''
+query userProfileCalendar($username: String!, $year: Int) {
+  matchedUser(username: $username) {
+    userCalendar(year: $year) {
+      submissionCalendar
+    }
+  }
+}
+''';
+
+    final profileData = await _postQuery(
+      operationName: 'getUserProfile',
+      query: profileQuery,
+      variables: {
+        'username': cleanUsername,
+      },
+    );
+
+    final matchedUser = profileData['matchedUser'];
+
+    if (matchedUser == null) {
+      throw Exception(
+        'LeetCode user "$cleanUsername" not found.',
+      );
+    }
+
+    final user = Map<String, dynamic>.from(
       matchedUser,
     );
 
-    final stats =
-        Map<String, dynamic>.from(
-      user['submitStats'] ?? {},
-    );
+    String? avatarUrl;
 
-    final submissions =
-        stats['acSubmissionNum'] as List? ??
-            const [];
+    final profile = user['profile'];
+
+    if (profile is Map) {
+      final avatar = profile['userAvatar'];
+
+      if (avatar is String && avatar.isNotEmpty) {
+        avatarUrl = avatar;
+      }
+    }
 
     int totalSolved = 0;
     int easySolved = 0;
     int mediumSolved = 0;
     int hardSolved = 0;
 
-    for (final item in submissions) {
-      if (item is! Map) continue;
+    final submitStats = user['submitStats'];
 
-      final difficulty =
-          item['difficulty']
-              ?.toString();
+    if (submitStats is Map) {
+      final submissionList =
+          submitStats['acSubmissionNum'];
 
-      final count =
-          (item['count'] as num?)
-                  ?.toInt() ??
-              0;
-
-      switch (difficulty) {
-        case 'All':
-          totalSolved = count;
-          break;
-        case 'Easy':
-          easySolved = count;
-          break;
-        case 'Medium':
-          mediumSolved = count;
-          break;
-        case 'Hard':
-          hardSolved = count;
-          break;
-      }
-    }
-
-    final profile =
-        user['profile'] is Map
-            ? Map<String, dynamic>.from(
-                user['profile'],
-              )
-            : <String, dynamic>{};
-
-    final contest =
-        user['userContestRanking'];
-
-    double? rating;
-
-    if (contest is Map &&
-        contest['rating'] is num) {
-      rating =
-          (contest['rating'] as num)
-              .toDouble();
-    }
-
-    final submissionCalendar =
-        user['submissionCalendar'];
-
-    final calendar =
-        <DateTime, int>{};
-
-    if (submissionCalendar is String) {
-      try {
-        final decoded =
-            Map<String, dynamic>.from(
-          _decodeJson(
-            submissionCalendar,
-          ),
-        );
-
-        for (final entry
-            in decoded.entries) {
-          final timestamp =
-              int.tryParse(
-            entry.key,
-          );
-
-          final count =
-              (entry.value as num?)
-                      ?.toInt() ??
-                  0;
-
-          if (timestamp == null) {
+      if (submissionList is List) {
+        for (final item in submissionList) {
+          if (item is! Map) {
             continue;
           }
 
-          final date =
-              DateTime.fromMillisecondsSinceEpoch(
-            timestamp * 1000,
-            isUtc: true,
-          ).toLocal();
+          final difficulty =
+              item['difficulty']?.toString();
 
-          calendar[
-              DateTime(
-            date.year,
-            date.month,
-            date.day,
-          )] = count;
+          final countValue = item['count'];
+
+          final count = countValue is num
+              ? countValue.toInt()
+              : int.tryParse(
+                    countValue?.toString() ?? '0',
+                  ) ??
+                  0;
+
+          switch (difficulty) {
+            case 'All':
+              totalSolved = count;
+              break;
+
+            case 'Easy':
+              easySolved = count;
+              break;
+
+            case 'Medium':
+              mediumSolved = count;
+              break;
+
+            case 'Hard':
+              hardSolved = count;
+              break;
+          }
         }
-      } catch (_) {}
+      }
     }
+
+    double? contestRating;
+
+    try {
+      final contestData = await _postQuery(
+        operationName: 'userContestRankingInfo',
+        query: contestQuery,
+        variables: {
+          'username': cleanUsername,
+        },
+      );
+
+      final ranking =
+          contestData['userContestRanking'];
+
+      if (ranking is Map) {
+        final rating = ranking['rating'];
+
+        if (rating is num) {
+          contestRating = rating.toDouble();
+        }
+      }
+    } catch (_) {}
+
+    Map<DateTime, int> submissions = {};
+
+    try {
+      final calendarData = await _postQuery(
+        operationName: 'userProfileCalendar',
+        query: calendarQuery,
+        variables: {
+          'username': cleanUsername,
+          'year': DateTime.now().year,
+        },
+      );
+
+      final calendarUser =
+          calendarData['matchedUser'];
+
+      if (calendarUser is Map) {
+        final userCalendar =
+            calendarUser['userCalendar'];
+
+        if (userCalendar is Map) {
+          final rawCalendar =
+              userCalendar['submissionCalendar'];
+
+          if (rawCalendar is String &&
+              rawCalendar.isNotEmpty) {
+            final decoded =
+                jsonDecode(rawCalendar);
+
+            if (decoded is Map) {
+              final result =
+                  <DateTime, int>{};
+
+              decoded.forEach((key, value) {
+                final timestamp =
+                    int.tryParse(key.toString());
+
+                if (timestamp == null) {
+                  return;
+                }
+
+                final date =
+                    DateTime.fromMillisecondsSinceEpoch(
+                  timestamp * 1000,
+                  isUtc: true,
+                ).toLocal();
+
+                final count = value is num
+                    ? value.toInt()
+                    : int.tryParse(
+                          value.toString(),
+                        ) ??
+                        0;
+
+                result[
+                  DateTime(
+                    date.year,
+                    date.month,
+                    date.day,
+                  )
+                ] = count;
+              });
+
+              submissions = result;
+            }
+          }
+        }
+      }
+    } catch (_) {}
 
     return LeetcodeLiveData(
       username:
-          user['username'] ??
-          username,
-      avatarUrl:
-          profile['userAvatar']
-              ?.toString(),
-      totalSolved:
-          totalSolved,
-      easySolved:
-          easySolved,
-      mediumSolved:
-          mediumSolved,
-      hardSolved:
-          hardSolved,
-      contestRating:
-          rating,
-      submissions:
-          calendar,
+          user['username']?.toString() ??
+              cleanUsername,
+      avatarUrl: avatarUrl,
+      totalSolved: totalSolved,
+      easySolved: easySolved,
+      mediumSolved: mediumSolved,
+      hardSolved: hardSolved,
+      contestRating: contestRating,
+      submissions: submissions,
     );
-  }
-
-  Map<String, dynamic> _decodeJson(
-    String value,
-  ) {
-    return Map<String, dynamic>.from(
-      _jsonDecode(value),
-    );
-  }
-
-  dynamic _jsonDecode(
-    String value,
-  ) {
-    return const JsonCodec().decode(value);
   }
 }

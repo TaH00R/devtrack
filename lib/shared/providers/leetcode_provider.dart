@@ -13,6 +13,7 @@ class LeetcodeProvider extends ChangeNotifier {
   LeetcodeLiveData? _liveData;
 
   bool _isLoading = false;
+
   bool _isLiveLoading = false;
 
   String? _error;
@@ -30,17 +31,19 @@ class LeetcodeProvider extends ChangeNotifier {
   Future<void> getProfiles() async {
     _isLoading = true;
     _error = null;
+
     notifyListeners();
 
     try {
       _profiles =
-          await _leetcodeRepository
-              .getProfiles();
+          await _leetcodeRepository.getProfiles();
 
       if (_profiles.isNotEmpty) {
         await getLiveData(
           _profiles.first.username,
         );
+      } else {
+        _liveData = null;
       }
     } catch (e) {
       _error = e.toString();
@@ -54,14 +57,18 @@ class LeetcodeProvider extends ChangeNotifier {
     String username,
   ) async {
     _isLiveLoading = true;
+    _error = null;
+
     notifyListeners();
 
     try {
       _liveData =
-          await _leetcodeRepository
-              .getLiveData(username);
+          await _leetcodeRepository.getLiveData(
+        username,
+      );
     } catch (e) {
       _error = e.toString();
+      _liveData = null;
     } finally {
       _isLiveLoading = false;
       notifyListeners();
@@ -73,16 +80,20 @@ class LeetcodeProvider extends ChangeNotifier {
   ) async {
     _isLoading = true;
     _error = null;
+
     notifyListeners();
 
     try {
       final profile =
-          await _leetcodeRepository
-              .createProfile(username);
+          await _leetcodeRepository.createProfile(
+        username,
+      );
 
       _profiles.add(profile);
 
-      await getLiveData(username);
+      await getLiveData(
+        profile.username,
+      );
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -97,20 +108,18 @@ class LeetcodeProvider extends ChangeNotifier {
   ) async {
     _isLoading = true;
     _error = null;
+
     notifyListeners();
 
     try {
       final updated =
-          await _leetcodeRepository
-              .updateProfile(
+          await _leetcodeRepository.updateProfile(
         profileId,
         profile,
       );
 
-      final index =
-          _profiles.indexWhere(
-        (item) =>
-            item.id == profileId,
+      final index = _profiles.indexWhere(
+        (item) => item.id == profileId,
       );
 
       if (index != -1) {
@@ -133,18 +142,26 @@ class LeetcodeProvider extends ChangeNotifier {
   ) async {
     _isLoading = true;
     _error = null;
+
     notifyListeners();
 
     try {
-      await _leetcodeRepository
-          .deleteProfile(profileId);
+      await _leetcodeRepository.deleteProfile(
+        profileId,
+      );
 
       _profiles.removeWhere(
         (profile) =>
             profile.id == profileId,
       );
 
-      _liveData = null;
+      if (_profiles.isEmpty) {
+        _liveData = null;
+      } else {
+        await getLiveData(
+          _profiles.first.username,
+        );
+      }
     } catch (e) {
       _error = e.toString();
     } finally {

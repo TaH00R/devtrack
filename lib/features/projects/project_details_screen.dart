@@ -1,3 +1,7 @@
+import 'package:devtrack/features/projects/widgets/project_details_text_field.dart';
+import 'package:devtrack/features/projects/widgets/project_progress_section.dart';
+import 'package:devtrack/features/projects/widgets/project_section_label.dart';
+import 'package:devtrack/features/projects/widgets/project_task_list.dart';
 import 'package:devtrack/shared/models/project_request.dart';
 import 'package:devtrack/shared/models/project_response.dart';
 import 'package:devtrack/shared/providers/project_provider.dart';
@@ -64,7 +68,8 @@ class _ProjectDetailsScreenState
       return;
     }
 
-    final projectProvider = context.read<ProjectProvider>();
+    final projectProvider =
+        context.read<ProjectProvider>();
 
     final request = ProjectRequest(
       name: _nameController.text.trim(),
@@ -98,6 +103,7 @@ class _ProjectDetailsScreenState
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xff1A1A1E),
+
           title: Text(
             "DELETE PROJECT?",
             style: GoogleFonts.pressStart2p(
@@ -105,6 +111,7 @@ class _ProjectDetailsScreenState
               fontSize: 14,
             ),
           ),
+
           content: Text(
             "This action cannot be undone.",
             style: GoogleFonts.jetBrainsMono(
@@ -112,11 +119,13 @@ class _ProjectDetailsScreenState
               fontSize: 12,
             ),
           ),
+
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context, false);
               },
+
               child: Text(
                 "CANCEL",
                 style: GoogleFonts.jetBrainsMono(
@@ -124,10 +133,12 @@ class _ProjectDetailsScreenState
                 ),
               ),
             ),
+
             TextButton(
               onPressed: () {
                 Navigator.pop(context, true);
               },
+
               child: Text(
                 "DELETE",
                 style: GoogleFonts.jetBrainsMono(
@@ -142,7 +153,8 @@ class _ProjectDetailsScreenState
 
     if (confirmed != true) return;
 
-    final projectProvider = context.read<ProjectProvider>();
+    final projectProvider =
+        context.read<ProjectProvider>();
 
     await projectProvider.deleteProject(
       widget.project.id,
@@ -167,6 +179,7 @@ class _ProjectDetailsScreenState
             fontSize: 12,
           ),
         ),
+
         backgroundColor: const Color(0xff2A1A20),
       ),
     );
@@ -174,7 +187,8 @@ class _ProjectDetailsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final taskProvider = context.watch<TaskProvider>();
+    final taskProvider =
+        context.watch<TaskProvider>();
 
     final tasks = taskProvider.tasks
         .where(
@@ -206,6 +220,7 @@ class _ProjectDetailsScreenState
             onPressed: () {
               Navigator.pop(context);
             },
+
             icon: const Icon(
               Icons.arrow_back,
               color: Colors.white70,
@@ -227,10 +242,12 @@ class _ProjectDetailsScreenState
                   _editing = !_editing;
                 });
               },
+
               icon: Icon(
                 _editing
                     ? Icons.close
                     : Icons.edit_outlined,
+
                 color: const Color(0xffB388FF),
               ),
             ),
@@ -244,76 +261,27 @@ class _ProjectDetailsScreenState
             20,
             30,
           ),
+
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Hero(
-                    tag: 'project-icon-${widget.project.id}',
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          color: const Color(0xff6EE7A2)
-                              .withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: const Color(0xff6EE7A2)
-                                .withOpacity(0.2),
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.folder_outlined,
-                          color: Color(0xff6EE7A2),
-                          size: 38,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(width: 18),
-
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: _editing
-                          ? _buildTextField(
-                              _nameController,
-                              "Project name",
-                            )
-                          : Hero(
-                              tag:
-                                  'project-name-${widget.project.id}',
-                              child: Material(
-                                color: Colors.transparent,
-                                child: Text(
-                                  widget.project.name,
-                                  style: GoogleFonts.pressStart2p(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                  ),
-                                ),
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
+              _buildProjectHeader(),
 
               const SizedBox(height: 22),
 
-              _sectionLabel("DESCRIPTION"),
+              const ProjectSectionLabel(
+                text: "DESCRIPTION",
+              ),
 
               const SizedBox(height: 10),
 
               _editing
-                  ? _buildTextField(
-                      _descriptionController,
-                      "Description",
+                  ? ProjectDetailsTextField(
+                      controller:
+                          _descriptionController,
+                      hint: "Description",
                       maxLines: 5,
                     )
                   : Text(
@@ -327,53 +295,18 @@ class _ProjectDetailsScreenState
 
               const SizedBox(height: 26),
 
-              _sectionLabel("GITHUB"),
+              const ProjectSectionLabel(
+                text: "GITHUB",
+              ),
 
               const SizedBox(height: 10),
 
               _editing
-                  ? _buildTextField(
-                      _githubController,
-                      "https://github.com/...",
+                  ? ProjectDetailsTextField(
+                      controller: _githubController,
+                      hint: "https://github.com/...",
                     )
-                  : Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: Colors.white10,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.code,
-                            color: Color(0xffB388FF),
-                            size: 20,
-                          ),
-
-                          const SizedBox(width: 10),
-
-                          Expanded(
-                            child: Text(
-                              widget.project.githubUrl ??
-                                  "No GitHub repository",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.jetBrainsMono(
-                                color:
-                                    widget.project.githubUrl != null
-                                        ? Colors.white70
-                                        : Colors.white24,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  : _buildGithubDisplay(),
 
               if (_editing) ...[
                 const SizedBox(height: 20),
@@ -381,16 +314,25 @@ class _ProjectDetailsScreenState
                 SizedBox(
                   width: double.infinity,
                   height: 50,
+
                   child: ElevatedButton(
                     onPressed: _saveChanges,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff6EE7A2),
-                      foregroundColor: const Color(0xff121214),
+
+                    style:
+                        ElevatedButton.styleFrom(
+                      backgroundColor:
+                          const Color(0xff6EE7A2),
+
+                      foregroundColor:
+                          const Color(0xff121214),
+
                       elevation: 0,
                     ),
+
                     child: Text(
                       "SAVE CHANGES",
-                      style: GoogleFonts.pressStart2p(
+                      style:
+                          GoogleFonts.pressStart2p(
                         fontSize: 11,
                       ),
                     ),
@@ -400,145 +342,57 @@ class _ProjectDetailsScreenState
 
               const SizedBox(height: 30),
 
-              _sectionLabel("PROGRESS"),
+              const ProjectSectionLabel(
+                text: "PROGRESS",
+              ),
 
               const SizedBox(height: 12),
 
-              Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "$completedTasks / ${tasks.length} tasks",
-                    style: GoogleFonts.jetBrainsMono(
-                      color: Colors.white54,
-                      fontSize: 12,
-                    ),
-                  ),
-
-                  Text(
-                    "$percentage%",
-                    style: GoogleFonts.jetBrainsMono(
-                      color: const Color(0xff6EE7A2),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 10),
-
-              Row(
-                children: List.generate(
-                  20,
-                  (index) {
-                    final filled =
-                        index < (progress * 20).round();
-
-                    return Expanded(
-                      child: Container(
-                        height: 8,
-                        margin: EdgeInsets.only(
-                          right: index == 19 ? 0 : 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: filled
-                              ? const Color(0xff6EE7A2)
-                              : Colors.white10,
-                          borderRadius:
-                              BorderRadius.circular(2),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+              ProjectProgressSection(
+                completedTasks: completedTasks,
+                totalTasks: tasks.length,
+                progress: progress,
+                percentage: percentage,
               ),
 
               const SizedBox(height: 30),
 
-              _sectionLabel("TASKS"),
+              const ProjectSectionLabel(
+                text: "TASKS",
+              ),
 
               const SizedBox(height: 12),
 
-              if (tasks.isEmpty)
-                Text(
-                  "> No tasks assigned to this project.",
-                  style: GoogleFonts.jetBrainsMono(
-                    color: Colors.white24,
-                    fontSize: 12,
-                  ),
-                )
-              else
-                Column(
-                  children: tasks.map(
-                    (task) {
-                      return Container(
-                        margin: const EdgeInsets.only(
-                          bottom: 8,
-                        ),
-                        padding: const EdgeInsets.all(13),
-                        decoration: BoxDecoration(
-                          color: const Color(0xff1A1A1E),
-                          borderRadius:
-                              BorderRadius.circular(10),
-                          border: Border.all(
-                            color: Colors.white10,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              task.completed == true
-                                  ? Icons.check_circle
-                                  : Icons.radio_button_unchecked,
-                              color: task.completed == true
-                                  ? const Color(0xff6EE7A2)
-                                  : Colors.white24,
-                              size: 19,
-                            ),
-
-                            const SizedBox(width: 12),
-
-                            Expanded(
-                              child: Text(
-                                task.title,
-                                style: GoogleFonts.jetBrainsMono(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                  decoration:
-                                      task.completed == true
-                                          ? TextDecoration.lineThrough
-                                          : null,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ).toList(),
-                ),
+              ProjectTaskList(
+                tasks: tasks,
+              ),
 
               const SizedBox(height: 30),
 
               SizedBox(
                 width: double.infinity,
                 height: 50,
+
                 child: OutlinedButton.icon(
                   onPressed: _deleteProject,
+
                   icon: const Icon(
                     Icons.delete_outline,
                     size: 19,
                   ),
+
                   label: Text(
                     "DELETE PROJECT",
                     style: GoogleFonts.jetBrainsMono(
                       fontSize: 11,
                     ),
                   ),
-                  style: OutlinedButton.styleFrom(
+
+                  style:
+                      OutlinedButton.styleFrom(
                     foregroundColor:
                         const Color(0xffFF8BA7),
+
                     side: const BorderSide(
                       color: Color(0xffFF8BA7),
                     ),
@@ -564,57 +418,127 @@ class _ProjectDetailsScreenState
     );
   }
 
-  Widget _sectionLabel(String text) {
-    return Text(
-      text,
-      style: GoogleFonts.jetBrainsMono(
-        color: const Color(0xffF3C86A),
-        fontSize: 11,
-        fontWeight: FontWeight.bold,
-      ),
+  Widget _buildProjectHeader() {
+    return Row(
+      crossAxisAlignment:
+          CrossAxisAlignment.start,
+
+      children: [
+        Hero(
+          tag:
+              'project-icon-${widget.project.id}',
+
+          child: Material(
+            color: Colors.transparent,
+
+            child: Container(
+              width: 72,
+              height: 72,
+
+              decoration: BoxDecoration(
+                color: const Color(0xff6EE7A2)
+                    .withOpacity(0.08),
+
+                borderRadius:
+                    BorderRadius.circular(16),
+
+                border: Border.all(
+                  color: const Color(0xff6EE7A2)
+                      .withOpacity(0.2),
+                ),
+              ),
+
+              child: const Icon(
+                Icons.folder_outlined,
+                color: Color(0xff6EE7A2),
+                size: 38,
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 18),
+
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 5),
+
+            child: _editing
+                ? ProjectDetailsTextField(
+                    controller: _nameController,
+                    hint: "Project name",
+                  )
+                : Hero(
+                    tag:
+                        'project-name-${widget.project.id}',
+
+                    child: Material(
+                      color: Colors.transparent,
+
+                      child: Text(
+                        widget.project.name,
+
+                        style:
+                            GoogleFonts.pressStart2p(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildTextField(
-    TextEditingController controller,
-    String hint, {
-    int maxLines = 1,
-  }) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      style: GoogleFonts.jetBrainsMono(
-        color: Colors.white,
-        fontSize: 13,
+  Widget _buildGithubDisplay() {
+    return Container(
+      width: double.infinity,
+
+      padding: const EdgeInsets.all(15),
+
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+
+        borderRadius:
+            BorderRadius.circular(10),
+
+        border: Border.all(
+          color: Colors.white10,
+        ),
       ),
-      cursorColor: const Color(0xff6EE7A2),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: GoogleFonts.jetBrainsMono(
-          color: Colors.white24,
-          fontSize: 12,
-        ),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.05),
-        contentPadding: const EdgeInsets.all(15),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Colors.white10,
+
+      child: Row(
+        children: [
+          const Icon(
+            Icons.code,
+            color: Color(0xffB388FF),
+            size: 20,
           ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Colors.white10,
+
+          const SizedBox(width: 10),
+
+          Expanded(
+            child: Text(
+              widget.project.githubUrl ??
+                  "No GitHub repository",
+
+              maxLines: 1,
+
+              overflow: TextOverflow.ellipsis,
+
+              style: GoogleFonts.jetBrainsMono(
+                color:
+                    widget.project.githubUrl != null
+                        ? Colors.white70
+                        : Colors.white24,
+
+                fontSize: 12,
+              ),
+            ),
           ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Color(0xff6EE7A2),
-          ),
-        ),
+        ],
       ),
     );
   }

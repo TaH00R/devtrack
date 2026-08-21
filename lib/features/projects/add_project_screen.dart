@@ -1,4 +1,6 @@
 import 'package:devtrack/features/auth/providers/auth_provider.dart';
+import 'package:devtrack/features/projects/widgets/project_form_field.dart';
+import 'package:devtrack/features/projects/widgets/project_form_label.dart';
 import 'package:devtrack/shared/models/project_request.dart';
 import 'package:devtrack/shared/providers/project_provider.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +20,10 @@ class _AddProjectScreenState
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
+
   final _descriptionController =
       TextEditingController();
+
   final _githubController = TextEditingController();
 
   @override
@@ -41,6 +45,7 @@ class _AddProjectScreenState
 
     if (userId == null) {
       _showError("User not authenticated.");
+
       return;
     }
 
@@ -49,12 +54,15 @@ class _AddProjectScreenState
 
     final request = ProjectRequest(
       name: _nameController.text.trim(),
+
       description:
           _descriptionController.text.trim(),
+
       githubUrl:
           _githubController.text.trim().isEmpty
               ? null
               : _githubController.text.trim(),
+
       userId: userId,
     );
 
@@ -64,6 +72,7 @@ class _AddProjectScreenState
 
     if (projectProvider.error != null) {
       _showError(projectProvider.error!);
+
       return;
     }
 
@@ -79,7 +88,9 @@ class _AddProjectScreenState
             fontSize: 12,
           ),
         ),
-        backgroundColor: const Color(0xff2A1A20),
+
+        backgroundColor:
+            const Color(0xff2A1A20),
       ),
     );
   }
@@ -91,14 +102,18 @@ class _AddProjectScreenState
 
     return SafeArea(
       child: Scaffold(
-        backgroundColor: const Color(0xff121214),
+        backgroundColor:
+            const Color(0xff121214),
 
         appBar: AppBar(
-          backgroundColor: const Color(0xff121214),
+          backgroundColor:
+              const Color(0xff121214),
+
           elevation: 0,
 
           leading: IconButton(
             onPressed: () => Navigator.pop(context),
+
             icon: const Icon(
               Icons.arrow_back,
               color: Colors.white70,
@@ -107,8 +122,11 @@ class _AddProjectScreenState
 
           title: Text(
             "ADD PROJECT",
+
             style: GoogleFonts.pressStart2p(
-              color: const Color(0xff6EE7A2),
+              color:
+                  const Color(0xff6EE7A2),
+
               fontSize: 17,
             ),
           ),
@@ -121,29 +139,40 @@ class _AddProjectScreenState
             22,
             30,
           ),
+
           child: Form(
             key: _formKey,
+
             child: Column(
               crossAxisAlignment:
                   CrossAxisAlignment.start,
+
               children: [
                 Text(
                   "> Initialize new project.",
+
                   style: GoogleFonts.jetBrainsMono(
-                    color: const Color(0xff6EE7A2),
+                    color:
+                        const Color(0xff6EE7A2),
+
                     fontSize: 14,
                   ),
                 ),
 
                 const SizedBox(height: 28),
 
-                _buildLabel("PROJECT NAME"),
+                const ProjectFormLabel(
+                  text: "PROJECT NAME",
+                ),
 
                 const SizedBox(height: 10),
 
-                _buildTextField(
+                ProjectFormField(
                   controller: _nameController,
-                  hintText: "What are you building?",
+
+                  hintText:
+                      "What are you building?",
+
                   validator: (value) {
                     if (value == null ||
                         value.trim().isEmpty) {
@@ -156,15 +185,21 @@ class _AddProjectScreenState
 
                 const SizedBox(height: 24),
 
-                _buildLabel("DESCRIPTION"),
+                const ProjectFormLabel(
+                  text: "DESCRIPTION",
+                ),
 
                 const SizedBox(height: 10),
 
-                _buildTextField(
-                  controller: _descriptionController,
+                ProjectFormField(
+                  controller:
+                      _descriptionController,
+
                   hintText:
                       "Describe your project...",
+
                   maxLines: 5,
+
                   validator: (value) {
                     if (value == null ||
                         value.trim().isEmpty) {
@@ -177,14 +212,18 @@ class _AddProjectScreenState
 
                 const SizedBox(height: 24),
 
-                _buildLabel("GITHUB URL"),
+                const ProjectFormLabel(
+                  text: "GITHUB URL",
+                ),
 
                 const SizedBox(height: 10),
 
-                _buildTextField(
+                ProjectFormField(
                   controller: _githubController,
+
                   hintText:
                       "https://github.com/username/project",
+
                   keyboardType:
                       TextInputType.url,
                 ),
@@ -194,42 +233,55 @@ class _AddProjectScreenState
                 SizedBox(
                   width: double.infinity,
                   height: 54,
+
                   child: ElevatedButton(
                     onPressed:
                         projectProvider.isLoading
                             ? null
                             : _createProject,
+
                     style:
                         ElevatedButton.styleFrom(
                       backgroundColor:
                           const Color(0xff6EE7A2),
+
                       disabledBackgroundColor:
                           Colors.white10,
+
                       foregroundColor:
                           const Color(0xff121214),
+
                       elevation: 0,
+
                       shape:
                           RoundedRectangleBorder(
                         borderRadius:
-                            BorderRadius.circular(10),
+                            BorderRadius.circular(
+                          10,
+                        ),
                       ),
                     ),
+
                     child:
                         projectProvider.isLoading
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
+
                                 child:
                                     CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color:
-                                      Color(0xff121214),
+
+                                  color: Color(
+                                    0xff121214,
+                                  ),
                                 ),
                               )
                             : Text(
                                 "CREATE PROJECT",
-                                style:
-                                    GoogleFonts.pressStart2p(
+
+                                style: GoogleFonts
+                                    .pressStart2p(
                                   fontSize: 12,
                                 ),
                               ),
@@ -241,8 +293,8 @@ class _AddProjectScreenState
                 Center(
                   child: Text(
                     "> build something worth shipping.",
-                    style:
-                        GoogleFonts.jetBrainsMono(
+
+                    style: GoogleFonts.jetBrainsMono(
                       color: Colors.white24,
                       fontSize: 11,
                     ),
@@ -250,98 +302,6 @@ class _AddProjectScreenState
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: GoogleFonts.jetBrainsMono(
-        color: const Color(0xffF3C86A),
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    String? Function(String?)? validator,
-    int maxLines = 1,
-    TextInputType? keyboardType,
-  }) {
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      style: GoogleFonts.jetBrainsMono(
-        color: Colors.white,
-        fontSize: 13,
-      ),
-      cursorColor: const Color(0xff6EE7A2),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: GoogleFonts.jetBrainsMono(
-          color: Colors.white24,
-          fontSize: 13,
-        ),
-        filled: true,
-        fillColor:
-            Colors.white.withOpacity(0.05),
-        contentPadding:
-            const EdgeInsets.all(16),
-
-        border: OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(10),
-          borderSide:
-              const BorderSide(
-            color: Colors.white10,
-          ),
-        ),
-
-        enabledBorder:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(10),
-          borderSide:
-              const BorderSide(
-            color: Colors.white10,
-          ),
-        ),
-
-        focusedBorder:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(10),
-          borderSide:
-              const BorderSide(
-            color: Color(0xff6EE7A2),
-          ),
-        ),
-
-        errorBorder:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(10),
-          borderSide:
-              const BorderSide(
-            color: Color(0xffFF8BA7),
-          ),
-        ),
-
-        focusedErrorBorder:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(10),
-          borderSide:
-              const BorderSide(
-            color: Color(0xffFF8BA7),
           ),
         ),
       ),

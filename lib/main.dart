@@ -32,111 +32,55 @@ Future<void> main() async {
 
   await Hive.initFlutter();
 
-  final tokenStorage =
-      TokenStorage();
+  final tokenStorage = TokenStorage();
 
-  final apiClient =
-      ApiClient(tokenStorage);
+  final apiClient = ApiClient(tokenStorage);
 
-  final authRepository =
-      AuthRepository(
-    apiClient,
-    tokenStorage,
-  );
+  final authRepository = AuthRepository(apiClient, tokenStorage);
 
-  final githubRepository =
-      GithubRepository(apiClient);
+  final githubRepository = GithubRepository(apiClient);
 
-  final goalRepository =
-      GoalRepository(apiClient);
+  final goalRepository = GoalRepository(apiClient);
 
-  final leetcodeRepository =
-      LeetcodeRepository(apiClient);
+  final leetcodeRepository = LeetcodeRepository(apiClient);
 
-  final noteRepository =
-      NoteRepository(apiClient);
+  final noteRepository = NoteRepository(apiClient);
 
-  final projectRepository =
-      ProjectRepository(apiClient);
+  final projectRepository = ProjectRepository(apiClient);
 
-  final tagRepository =
-      TagRepository(apiClient);
+  final tagRepository = TagRepository(apiClient);
 
-  final taskRepository =
-      TaskRepository(apiClient);
+  final taskRepository = TaskRepository(apiClient);
 
-  final userRepository =
-      UserRepository(apiClient);
+  final userRepository = UserRepository(apiClient);
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) =>
-              AuthProvider(
-            authRepository,
-          ),
-        ),
+        ChangeNotifierProvider(create: (_) => AuthProvider(authRepository)),
+
+        ChangeNotifierProvider(create: (_) => GithubProvider(githubRepository)),
+
+        ChangeNotifierProvider(create: (_) => GoalProvider(goalRepository)),
 
         ChangeNotifierProvider(
-          create: (_) =>
-              GithubProvider(
-            githubRepository,
-          ),
+          create: (_) => LeetcodeProvider(leetcodeRepository),
         ),
 
-        ChangeNotifierProvider(
-          create: (_) =>
-              GoalProvider(
-            goalRepository,
-          ),
-        ),
+        ChangeNotifierProvider(create: (_) => NoteProvider(noteRepository)),
 
         ChangeNotifierProvider(
-          create: (_) =>
-              LeetcodeProvider(
-            leetcodeRepository,
-          ),
+          create: (_) => ProjectProvider(projectRepository),
         ),
 
-        ChangeNotifierProvider(
-          create: (_) =>
-              NoteProvider(
-            noteRepository,
-          ),
-        ),
+        ChangeNotifierProvider(create: (_) => TagProvider(tagRepository)),
 
-        ChangeNotifierProvider(
-          create: (_) =>
-              ProjectProvider(
-            projectRepository,
-          ),
-        ),
+        ChangeNotifierProvider(create: (_) => TaskProvider(taskRepository)),
 
-        ChangeNotifierProvider(
-          create: (_) =>
-              TagProvider(
-            tagRepository,
-          ),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) =>
-              TaskProvider(
-            taskRepository,
-          ),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) =>
-              UserProvider(
-            userRepository,
-          ),
-        ),
+        ChangeNotifierProvider(create: (_) => UserProvider(userRepository)),
       ],
 
-      child:
-          const MyApp(),
+      child: const MyApp(),
     ),
   );
 }

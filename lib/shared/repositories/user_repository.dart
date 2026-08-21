@@ -14,6 +14,14 @@ class UserRepository {
     return UserResponse.fromJson(response.data);
   }
 
+  Future<UserResponse> getCurrentUser() async {
+    final response = await _apiClient.dio.get(
+      '/api/users/me',
+    );
+
+    return UserResponse.fromJson(response.data);
+  }
+
   Future<UserResponse> updateUser(
     int userId,
     Map<String, dynamic> data,

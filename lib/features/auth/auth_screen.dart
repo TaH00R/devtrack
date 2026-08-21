@@ -1,7 +1,5 @@
 import 'package:devtrack/features/auth/providers/auth_provider.dart';
 import 'package:devtrack/features/auth/widgets/field.dart';
-import 'package:devtrack/features/homepage/homepage.dart';
-import 'package:devtrack/shared/routes/smooth_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -202,9 +200,10 @@ class _AuthScreenState extends State<AuthScreen> {
                                     );
                                   } else if (isLogin &&
                                       provider.isAuthenticated) {
-                                        Navigator.pushReplacement(context, smoothRoute(
-                                          const HomeScreen(),
-                                        ));
+                                        await provider.login(
+                                          email: emailController.text.trim(),
+                                          password: passwordController.text,
+                                        );
                                   } else if (!isLogin) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(

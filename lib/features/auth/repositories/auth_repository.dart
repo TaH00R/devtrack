@@ -14,6 +14,14 @@ class AuthRepository {
     this._tokenStorage,
   );
 
+  Future<String?> getToken() async {
+    return await _tokenStorage.getToken();
+  }
+
+  Future<int?> getUserId() async {
+    return await _tokenStorage.getUserId();
+  }
+
   Future<AuthResponse> login(LoginRequest request) async {
     final response = await _apiClient.dio.post(
       '/api/auth/login',
@@ -22,17 +30,23 @@ class AuthRepository {
 
     final authResponse = AuthResponse.fromJson(response.data);
 
-    await _tokenStorage.saveToken(authResponse.token);
+    await _tokenStorage.saveToken(
+      authResponse.token,
+    );
+
+    await _tokenStorage.saveUserId(
+      authResponse.userId,
+    );
 
     return authResponse;
   }
 
   Future<void> register(RegisterRequest request) async {
-  await _apiClient.dio.post(
-    '/api/auth/register',
-    data: request.toJson(),
-  );
-}
+    await _apiClient.dio.post(
+      '/api/auth/register',
+      data: request.toJson(),
+    );
+  }
 
   Future<void> logout() async {
     await _tokenStorage.deleteToken();

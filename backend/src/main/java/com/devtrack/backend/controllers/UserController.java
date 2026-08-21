@@ -4,6 +4,7 @@ import com.devtrack.backend.dto.UserRequestDTO;
 import com.devtrack.backend.dto.UserResponseDTO;
 import com.devtrack.backend.services.UserService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,15 @@ public class UserController {
             @Valid @RequestBody UserRequestDTO userRequestDTO
     ) {
         return userService.createUser(userRequestDTO);
+    }
+
+    @GetMapping("/me")
+    public UserResponseDTO getCurrentUser(
+            Authentication authentication
+    ) {
+        return userService.getUserByUsername(
+                authentication.getName()
+        );
     }
 
     @GetMapping("/{id}")

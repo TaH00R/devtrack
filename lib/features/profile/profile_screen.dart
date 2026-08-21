@@ -1,4 +1,11 @@
 import 'package:devtrack/features/auth/providers/auth_provider.dart';
+import 'package:devtrack/features/profile/widgets/account_card.dart';
+import 'package:devtrack/features/profile/widgets/github_card.dart';
+import 'package:devtrack/features/profile/widgets/leetcode_card.dart';
+import 'package:devtrack/features/profile/widgets/logout_card.dart';
+import 'package:devtrack/features/profile/widgets/profile_header.dart';
+import 'package:devtrack/features/profile/widgets/profile_section_title.dart';
+import 'package:devtrack/features/profile/widgets/tags_card.dart';
 import 'package:devtrack/shared/models/github_profile.dart';
 import 'package:devtrack/shared/models/leetcode_profile.dart';
 import 'package:devtrack/shared/models/tag.dart';
@@ -51,9 +58,7 @@ class _DeveloperProfileScreenState
   Future<void> _load() async {
     if (!mounted) return;
 
-    final authProvider =
-        context.read<AuthProvider>();
-
+    final authProvider = context.read<AuthProvider>();
     final userId = authProvider.userId;
 
     await Future.wait([
@@ -71,8 +76,7 @@ class _DeveloperProfileScreenState
 
     if (!mounted) return;
 
-    final user =
-        context.read<UserProvider>().user;
+    final user = context.read<UserProvider>().user;
 
     final githubProfiles =
         context.read<GithubProvider>().profiles;
@@ -108,10 +112,7 @@ class _DeveloperProfileScreenState
     super.dispose();
   }
 
-  // ===========================================================
   // DISPLAY NAME
-  // ===========================================================
-
   Future<void> _saveDisplayName() async {
     final name =
         _displayNameController.text.trim();
@@ -165,10 +166,7 @@ class _DeveloperProfileScreenState
     });
   }
 
-  // ===========================================================
   // TAGS
-  // ===========================================================
-
   bool _isTagUsed(int tagId) {
     final tasks =
         context.read<TaskProvider>().tasks;
@@ -315,10 +313,7 @@ class _DeveloperProfileScreenState
     return result ?? false;
   }
 
-  // ===========================================================
   // GITHUB
-  // ===========================================================
-
   Future<void> _saveGithub() async {
     final username =
         _githubController.text.trim();
@@ -382,10 +377,7 @@ class _DeveloperProfileScreenState
     }
   }
 
-  // ===========================================================
   // LEETCODE
-  // ===========================================================
-
   Future<void> _saveLeetcode() async {
     final username =
         _leetcodeController.text.trim();
@@ -451,10 +443,20 @@ class _DeveloperProfileScreenState
     }
   }
 
-  // ===========================================================
-  // BUILD
-  // ===========================================================
+  // LOGOUT
+  Future<void> _logout() async {
+    await context
+        .read<AuthProvider>()
+        .logout();
 
+    if (!mounted) return;
+
+    Navigator.of(context).popUntil(
+      (route) => route.isFirst,
+    );
+  }
+
+  // BUILD
   @override
   Widget build(BuildContext context) {
     final user =
@@ -492,16 +494,15 @@ class _DeveloperProfileScreenState
       appBar: AppBar(
         backgroundColor:
             const Color(0xff121214),
+
         elevation: 0,
 
         leading: IconButton(
           onPressed: () =>
               Navigator.pop(context),
-
           icon: const Icon(
             Icons.arrow_back,
-            color:
-                Colors.white70,
+            color: Colors.white70,
           ),
         ),
 
@@ -533,1294 +534,147 @@ class _DeveloperProfileScreenState
                 CrossAxisAlignment.start,
 
             children: [
-              _buildHeader(
-                user?.displayName ??
+              ProfileHeader(
+                name:
+                    user?.displayName ??
                     user?.userName ??
                     'USER',
               ),
 
-              const SizedBox(
-                height: 25,
+              const SizedBox(height: 25),
+
+              const ProfileSectionTitle(
+                title: 'ACCOUNT',
+                icon: Icons.person_outline,
+                color: Color(0xffB388FF),
               ),
 
-              _sectionTitle(
-                'ACCOUNT',
-                Icons.person_outline,
-                const Color(
-                  0xffB388FF,
-                ),
-              ),
+              const SizedBox(height: 10),
 
-              const SizedBox(
-                height: 10,
-              ),
+              AccountCard(
+                user: user,
+                editingDisplayName:
+                    _editingDisplayName,
+                savingDisplayName:
+                    _savingDisplayName,
+                controller:
+                    _displayNameController,
+                onEdit: () {
+                  setState(() {
+                    _displayNameController.text =
+                        user?.displayName ??
+                        user?.userName ??
+                        '';
 
-              _buildAccountCard(
-                user,
-              ),
-
-              const SizedBox(
-                height: 22,
-              ),
-
-              _sectionTitle(
-                'MY TAGS',
-                Icons.label_outline,
-                const Color(
-                  0xffF3C86A,
-                ),
-              ),
-
-              const SizedBox(
-                height: 10,
-              ),
-
-              _buildTagsCard(
-                tagProvider,
-              ),
-
-              const SizedBox(
-                height: 22,
-              ),
-
-              _sectionTitle(
-                'GITHUB',
-                Icons.code,
-                const Color(
-                  0xffB388FF,
-                ),
-              ),
-
-              const SizedBox(
-                height: 10,
-              ),
-
-              _buildGithubCard(
-                githubProfile,
-                github,
-                githubProvider.isLiveLoading,
-              ),
-
-              const SizedBox(
-                height: 22,
-              ),
-
-              _sectionTitle(
-                'LEETCODE',
-                Icons.terminal,
-                const Color(
-                  0xffFF8BA7,
-                ),
-              ),
-
-              const SizedBox(
-                height: 10,
-              ),
-
-              _buildLeetcodeCard(
-                leetcodeProfile,
-                leetcode,
-                leetcodeProvider.isLiveLoading,
-              ),
-
-              const SizedBox(
-                height: 22,
-              ),
-
-              _sectionTitle(
-                'ACCOUNT ACTIONS',
-                Icons.settings_outlined,
-                const Color(
-                  0xffFF8BA7,
-                ),
-              ),
-
-              const SizedBox(
-                height: 10,
-              ),
-
-              _buildLogoutCard(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(
-    String name,
-  ) {
-    return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
-
-      children: [
-        Text(
-          'DEVELOPER',
-          style:
-              GoogleFonts.jetBrainsMono(
-            color:
-                const Color(
-              0xff6EE7A2,
-            ),
-            fontSize: 11,
-            fontWeight:
-                FontWeight.bold,
-            letterSpacing: 1.5,
-          ),
-        ),
-
-        const SizedBox(
-          height: 8,
-        ),
-
-        Text(
-          name.toUpperCase(),
-          maxLines: 2,
-          overflow:
-              TextOverflow.ellipsis,
-
-          style:
-              GoogleFonts.pressStart2p(
-            color:
-                Colors.white,
-            fontSize: 19,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAccountCard(
-    dynamic user,
-  ) {
-    return _card(
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-
-        children: [
-          Row(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
-
-            children: [
-              Expanded(
-                child: _field(
-                  'DISPLAY NAME',
-
-                  user?.displayName ??
-                      user?.userName ??
-                      'USER',
-                ),
-              ),
-
-              IconButton(
-                onPressed:
-                    _editingDisplayName
-                        ? _saveDisplayName
-                        : () {
-                            setState(() {
-                              _displayNameController
-                                  .text =
-                                  user?.displayName ??
-                                      user?.userName ??
-                                      '';
-
-                              _editingDisplayName =
-                                  true;
-                            });
-                          },
-
-                icon: Icon(
-                  _editingDisplayName
-                      ? Icons.check
-                      : Icons.edit_outlined,
-
-                  color:
-                      const Color(
-                    0xffB388FF,
-                  ),
-
-                  size: 20,
-                ),
-              ),
-            ],
-          ),
-
-          if (_editingDisplayName) ...[
-            const SizedBox(
-              height: 10,
-            ),
-
-            TextField(
-              controller:
-                  _displayNameController,
-
-              enabled:
-                  !_savingDisplayName,
-
-              style:
-                  GoogleFonts.jetBrainsMono(
-                color:
-                    Colors.white,
-                fontSize: 12,
-              ),
-
-              cursorColor:
-                  const Color(
-                0xffB388FF,
-              ),
-
-              decoration:
-                  _inputDecoration(
-                'Display name',
-              ),
-            ),
-          ],
-
-          const Divider(
-            color:
-                Colors.white10,
-            height: 28,
-          ),
-
-          _field(
-            'USERNAME',
-            user?.userName ??
-                'UNKNOWN',
-          ),
-
-          const SizedBox(
-            height: 17,
-          ),
-
-          _field(
-            'EMAIL',
-            user?.email ??
-                'UNKNOWN',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTagsCard(
-    TagProvider provider,
-  ) {
-    return _card(
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-
-        children: [
-          if (provider.isLoading)
-            const Center(
-              child:
-                  CircularProgressIndicator(
-                color:
-                    Color(0xffF3C86A),
-                strokeWidth: 2,
-              ),
-            )
-          else if (provider.tags.isEmpty)
-            Text(
-              '> No tags yet.',
-              style:
-                  GoogleFonts.jetBrainsMono(
-                color:
-                    Colors.white24,
-                fontSize: 11,
-              ),
-            )
-          else
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-
-              children:
-                  provider.tags.map(
-                (tag) {
-                  final used =
-                      _isTagUsed(
-                    tag.id,
-                  );
-
-                  return Container(
-                    padding:
-                        const EdgeInsets
-                            .symmetric(
-                      horizontal: 11,
-                      vertical: 9,
-                    ),
-
-                    decoration:
-                        BoxDecoration(
-                      color: used
-                          ? const Color(
-                              0xffF3C86A,
-                            ).withOpacity(.08)
-                          : Colors.white
-                              .withOpacity(.04),
-
-                      borderRadius:
-                          BorderRadius.circular(
-                        8,
-                      ),
-
-                      border:
-                          Border.all(
-                        color: used
-                            ? const Color(
-                                0xffF3C86A,
-                              ).withOpacity(.22)
-                            : Colors.white10,
-                      ),
-                    ),
-
-                    child: Row(
-                      mainAxisSize:
-                          MainAxisSize.min,
-
-                      children: [
-                        Icon(
-                          used
-                              ? Icons.lock_outline
-                              : Icons.label_outline,
-
-                          color: used
-                              ? const Color(
-                                  0xffF3C86A,
-                                )
-                              : Colors.white38,
-
-                          size: 14,
-                        ),
-
-                        const SizedBox(
-                          width: 6,
-                        ),
-
-                        Text(
-                          tag.name,
-
-                          style:
-                              GoogleFonts
-                                  .jetBrainsMono(
-                            color:
-                                Colors.white70,
-                            fontSize: 10,
-                          ),
-                        ),
-
-                        const SizedBox(
-                          width: 7,
-                        ),
-
-                        GestureDetector(
-                          onTap: used
-                              ? null
-                              : () =>
-                                  _deleteTag(
-                                tag,
-                              ),
-
-                          child:
-                              Icon(
-                            Icons.close,
-
-                            color: used
-                                ? Colors.white12
-                                : const Color(
-                                    0xffFF8BA7,
-                                  ),
-
-                            size: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
+                    _editingDisplayName =
+                        true;
+                  });
                 },
-              ).toList(),
-            ),
-
-          const SizedBox(
-            height: 15,
-          ),
-
-          if (_addingTag)
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller:
-                        _tagController,
-
-                    autofocus: true,
-
-                    onSubmitted:
-                        (_) => _createTag(),
-
-                    style:
-                        GoogleFonts.jetBrainsMono(
-                      color:
-                          Colors.white,
-                      fontSize: 12,
-                    ),
-
-                    cursorColor:
-                        const Color(
-                      0xffF3C86A,
-                    ),
-
-                    decoration:
-                        _inputDecoration(
-                      'New tag name',
-                    ),
-                  ),
-                ),
-
-                const SizedBox(
-                  width: 8,
-                ),
-
-                SizedBox(
-                  height: 48,
-
-                  child:
-                      ElevatedButton(
-                    onPressed:
-                        _createTag,
-
-                    style:
-                        ElevatedButton
-                            .styleFrom(
-                      backgroundColor:
-                          const Color(
-                        0xffF3C86A,
-                      ),
-
-                      foregroundColor:
-                          const Color(
-                        0xff121214,
-                      ),
-
-                      elevation: 0,
-                    ),
-
-                    child:
-                        const Icon(
-                      Icons.check,
-                    ),
-                  ),
-                ),
-              ],
-            )
-          else
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _addingTag = true;
-                });
-              },
-
-              child: Container(
-                padding:
-                    const EdgeInsets
-                        .symmetric(
-                  horizontal: 12,
-                  vertical: 9,
-                ),
-
-                decoration:
-                    BoxDecoration(
-                  color:
-                      const Color(
-                    0xffF3C86A,
-                  ).withOpacity(.05),
-
-                  borderRadius:
-                      BorderRadius.circular(
-                    8,
-                  ),
-
-                  border:
-                      Border.all(
-                    color:
-                        const Color(
-                      0xffF3C86A,
-                    ).withOpacity(.3),
-                  ),
-                ),
-
-                child: Row(
-                  mainAxisSize:
-                      MainAxisSize.min,
-
-                  children: [
-                    const Icon(
-                      Icons.add,
-                      color:
-                          Color(0xffF3C86A),
-                      size: 15,
-                    ),
-
-                    const SizedBox(
-                      width: 5,
-                    ),
-
-                    Text(
-                      'ADD TAG',
-                      style:
-                          GoogleFonts
-                              .jetBrainsMono(
-                        color:
-                            const Color(
-                          0xffF3C86A,
-                        ),
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-          const SizedBox(
-            height: 10,
-          ),
-
-          Text(
-            '> locked tags are currently used by a task',
-
-            style:
-                GoogleFonts.jetBrainsMono(
-              color:
-                  Colors.white30,
-              fontSize: 9,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGithubCard(
-    GithubProfile? profile,
-    dynamic liveData,
-    bool loading,
-  ) {
-    return _card(
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-
-                backgroundColor:
-                    const Color(
-                  0xffB388FF,
-                ).withOpacity(.10),
-
-                backgroundImage:
-                    liveData != null &&
-                            liveData.avatarUrl
-                                .toString()
-                                .isNotEmpty
-                        ? NetworkImage(
-                            liveData.avatarUrl
-                                .toString(),
-                          )
-                        : null,
-
-                child:
-                    liveData == null ||
-                            liveData.avatarUrl
-                                .toString()
-                                .isEmpty
-                        ? const Icon(
-                            Icons.code,
-                            color:
-                                Color(
-                              0xffB388FF,
-                            ),
-                          )
-                        : null,
+                onSave:
+                    _saveDisplayName,
               ),
 
-              const SizedBox(
-                width: 12,
+              const SizedBox(height: 22),
+
+              const ProfileSectionTitle(
+                title: 'MY TAGS',
+                icon: Icons.label_outline,
+                color: Color(0xffF3C86A),
               ),
 
-              Expanded(
-                child: Text(
-                  profile == null
-                      ? 'LINK GITHUB'
-                      : '@${profile.username}',
+              const SizedBox(height: 10),
 
-                  style:
-                      GoogleFonts.pressStart2p(
-                    color:
-                        Colors.white,
-                    fontSize: 10,
-                  ),
-                ),
+              TagsCard(
+                provider: tagProvider,
+                controller: _tagController,
+                addingTag: _addingTag,
+                isTagUsed: _isTagUsed,
+                onDeleteTag: _deleteTag,
+                onCreateTag: _createTag,
+                onStartAdding: () {
+                  setState(() {
+                    _addingTag = true;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 22),
+
+              const ProfileSectionTitle(
+                title: 'GITHUB',
+                icon: Icons.code,
+                color: Color(0xffB388FF),
+              ),
+
+              const SizedBox(height: 10),
+
+              GithubCard(
+                profile: githubProfile,
+                liveData: github,
+                loading:
+                    githubProvider.isLiveLoading,
+                linking: _linkingGithub,
+                controller:
+                    _githubController,
+                onSave: _saveGithub,
+              ),
+
+              const SizedBox(height: 22),
+
+              const ProfileSectionTitle(
+                title: 'LEETCODE',
+                icon: Icons.terminal,
+                color: Color(0xffFF8BA7),
+              ),
+
+              const SizedBox(height: 10),
+
+              LeetcodeCard(
+                profile: leetcodeProfile,
+                liveData: leetcode,
+                loading:
+                    leetcodeProvider.isLiveLoading,
+                linking: _linkingLeetcode,
+                controller:
+                    _leetcodeController,
+                onSave: _saveLeetcode,
+              ),
+
+              const SizedBox(height: 22),
+
+              const ProfileSectionTitle(
+                title: 'ACCOUNT ACTIONS',
+                icon: Icons.settings_outlined,
+                color: Color(0xffFF8BA7),
+              ),
+
+              const SizedBox(height: 10),
+
+              LogoutCard(
+                onLogout: _logout,
               ),
             ],
           ),
-
-          const SizedBox(
-            height: 14,
-          ),
-
-          TextField(
-            controller:
-                _githubController,
-
-            decoration:
-                _inputDecoration(
-              'GitHub username',
-            ),
-
-            style:
-                GoogleFonts.jetBrainsMono(
-              color:
-                  Colors.white,
-              fontSize: 12,
-            ),
-
-            cursorColor:
-                const Color(
-              0xffB388FF,
-            ),
-          ),
-
-          const SizedBox(
-            height: 10,
-          ),
-
-          SizedBox(
-            width:
-                double.infinity,
-
-            height: 46,
-
-            child:
-                ElevatedButton(
-              onPressed:
-                  _linkingGithub ||
-                          loading
-                      ? null
-                      : _saveGithub,
-
-              style:
-                  ElevatedButton
-                      .styleFrom(
-                backgroundColor:
-                    const Color(
-                  0xffB388FF,
-                ),
-
-                foregroundColor:
-                    Colors.white,
-
-                elevation: 0,
-              ),
-
-              child:
-                  _linkingGithub
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-
-                          child:
-                              CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color:
-                                Colors.white,
-                          ),
-                        )
-                      : Text(
-                          profile == null
-                              ? 'LINK GITHUB'
-                              : 'UPDATE GITHUB',
-
-                          style:
-                              GoogleFonts
-                                  .pressStart2p(
-                            fontSize:
-                                10,
-                          ),
-                        ),
-            ),
-          ),
-
-          if (liveData != null) ...[
-            const SizedBox(
-              height: 14,
-            ),
-
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMiniStat(
-                    'REPOS',
-                    '${liveData.publicRepos}',
-                    const Color(
-                      0xffB388FF,
-                    ),
-                  ),
-                ),
-
-                _verticalDivider(),
-
-                Expanded(
-                  child: _buildMiniStat(
-                    'FOLLOWERS',
-                    '${liveData.followers}',
-                    const Color(
-                      0xff64D8FF,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildLeetcodeCard(
-    LeetcodeProfile? profile,
-    dynamic liveData,
-    bool loading,
-  ) {
-    return _card(
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-
-                backgroundColor:
-                    const Color(
-                  0xffFF8BA7,
-                ).withOpacity(.10),
-
-                backgroundImage:
-                    liveData != null &&
-                            liveData.avatarUrl !=
-                                null &&
-                            liveData.avatarUrl
-                                .toString()
-                                .isNotEmpty
-                        ? NetworkImage(
-                            liveData.avatarUrl
-                                .toString(),
-                          )
-                        : null,
-
-                child:
-                    liveData == null ||
-                            liveData.avatarUrl ==
-                                null ||
-                            liveData.avatarUrl
-                                .toString()
-                                .isEmpty
-                        ? const Icon(
-                            Icons.terminal,
-                            color:
-                                Color(
-                              0xffFF8BA7,
-                            ),
-                          )
-                        : null,
-              ),
-
-              const SizedBox(
-                width: 12,
-              ),
-
-              Expanded(
-                child: Text(
-                  profile == null
-                      ? 'LINK LEETCODE'
-                      : profile.username,
-
-                  style:
-                      GoogleFonts.pressStart2p(
-                    color:
-                        Colors.white,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(
-            height: 14,
-          ),
-
-          TextField(
-            controller:
-                _leetcodeController,
-
-            decoration:
-                _inputDecoration(
-              'LeetCode username',
-            ),
-
-            style:
-                GoogleFonts.jetBrainsMono(
-              color:
-                  Colors.white,
-              fontSize: 12,
-            ),
-
-            cursorColor:
-                const Color(
-              0xffFF8BA7,
-            ),
-          ),
-
-          const SizedBox(
-            height: 10,
-          ),
-
-          SizedBox(
-            width:
-                double.infinity,
-
-            height: 46,
-
-            child:
-                ElevatedButton(
-              onPressed:
-                  _linkingLeetcode ||
-                          loading
-                      ? null
-                      : _saveLeetcode,
-
-              style:
-                  ElevatedButton
-                      .styleFrom(
-                backgroundColor:
-                    const Color(
-                  0xffFF8BA7,
-                ),
-
-                foregroundColor:
-                    const Color(
-                  0xff121214,
-                ),
-
-                elevation: 0,
-              ),
-
-              child:
-                  _linkingLeetcode
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-
-                          child:
-                              CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color:
-                                Color(
-                              0xff121214,
-                            ),
-                          ),
-                        )
-                      : Text(
-                          profile == null
-                              ? 'LINK LEETCODE'
-                              : 'UPDATE LEETCODE',
-
-                          style:
-                              GoogleFonts
-                                  .pressStart2p(
-                            fontSize:
-                                10,
-                          ),
-                        ),
-            ),
-          ),
-
-          if (liveData != null) ...[
-            const SizedBox(
-              height: 14,
-            ),
-
-            Row(
-              children: [
-                Expanded(
-                  child:
-                      _buildMiniStat(
-                    'SOLVED',
-                    '${liveData.totalSolved}',
-                    const Color(
-                      0xffFF8BA7,
-                    ),
-                  ),
-                ),
-
-                _verticalDivider(),
-
-                Expanded(
-                  child:
-                      _buildMiniStat(
-                    'RATING',
-                    liveData.contestRating ==
-                            null
-                        ? '--'
-                        : liveData
-                            .contestRating!
-                            .toStringAsFixed(
-                              0,
-                            ),
-                    const Color(
-                      0xffF3C86A,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMiniStat(
-    String label,
-    String value,
-    Color color,
-  ) {
-    return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
-
-      children: [
-        Text(
-          value,
-          style:
-              GoogleFonts.pressStart2p(
-            color:
-                color,
-            fontSize: 13,
-          ),
-        ),
-
-        const SizedBox(
-          height: 5,
-        ),
-
-        Text(
-          label,
-          style:
-              GoogleFonts.jetBrainsMono(
-            color:
-                Colors.white30,
-            fontSize: 8,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLogoutCard() {
-    return _card(
-      child: ListTile(
-        contentPadding:
-            EdgeInsets.zero,
-
-        leading:
-            const Icon(
-          Icons.logout,
-          color:
-              Color(0xffFF8BA7),
-        ),
-
-        title:
-            Text(
-          'LOGOUT',
-          style:
-              GoogleFonts.jetBrainsMono(
-            color:
-                Colors.white70,
-            fontSize: 11,
-          ),
-        ),
-
-        onTap:
-            _logout,
-      ),
-    );
-  }
-
-  Future<void> _logout() async {
-    await context
-        .read<AuthProvider>()
-        .logout();
-
+  void _showError(String message) {
     if (!mounted) return;
 
-    Navigator.of(context)
-        .popUntil(
-      (route) =>
-          route.isFirst,
-    );
-  }
-
-  Widget _sectionTitle(
-    String title,
-    IconData icon,
-    Color color,
-  ) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          color:
-              color,
-          size: 17,
-        ),
-
-        const SizedBox(
-          width: 8,
-        ),
-
-        Text(
-          title,
-          style:
-              GoogleFonts.jetBrainsMono(
-            color:
-                Colors.white,
-            fontSize: 11,
-            fontWeight:
-                FontWeight.bold,
-            letterSpacing:
-                1.4,
-          ),
-        ),
-
-        const SizedBox(
-          width: 10,
-        ),
-
-        Expanded(
-          child:
-              Container(
-            height: 1,
-            color:
-                Colors.white10,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _card({
-    required Widget child,
-  }) {
-    return Container(
-      width:
-          double.infinity,
-
-      padding:
-          const EdgeInsets.all(
-        17,
-      ),
-
-      decoration:
-          BoxDecoration(
-        color:
-            const Color(
-          0xff1A1A1E,
-        ),
-
-        borderRadius:
-            BorderRadius.circular(
-          14,
-        ),
-
-        border:
-            Border.all(
-          color:
-              Colors.white10,
-        ),
-      ),
-
-      child:
-          child,
-    );
-  }
-
-  Widget _field(
-    String label,
-    String value,
-  ) {
-    return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
-
-      children: [
-        Text(
-          label,
-
-          style:
-              GoogleFonts.jetBrainsMono(
-            color:
-                Colors.white24,
-            fontSize: 9,
-            fontWeight:
-                FontWeight.bold,
-          ),
-        ),
-
-        const SizedBox(
-          height: 5,
-        ),
-
-        Text(
-          value,
-
-          style:
-              GoogleFonts.jetBrainsMono(
-            color:
-                Colors.white70,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _verticalDivider() {
-    return Container(
-      height: 35,
-
-      width: 1,
-
-      margin:
-          const EdgeInsets.symmetric(
-        horizontal: 10,
-      ),
-
-      color:
-          Colors.white10,
-    );
-  }
-
-  InputDecoration _inputDecoration(
-    String hint,
-  ) {
-    return InputDecoration(
-      hintText:
-          hint,
-
-      hintStyle:
-          GoogleFonts.jetBrainsMono(
-        color:
-            Colors.white24,
-        fontSize: 11,
-      ),
-
-      filled:
-          true,
-
-      fillColor:
-          Colors.white.withOpacity(
-        .05,
-      ),
-
-      contentPadding:
-          const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 14,
-      ),
-
-      border:
-          OutlineInputBorder(
-        borderRadius:
-            BorderRadius.circular(
-          9,
-        ),
-
-        borderSide:
-            const BorderSide(
-          color:
-              Colors.white10,
-        ),
-      ),
-
-      enabledBorder:
-          OutlineInputBorder(
-        borderRadius:
-            BorderRadius.circular(
-          9,
-        ),
-
-        borderSide:
-            const BorderSide(
-          color:
-              Colors.white10,
-        ),
-      ),
-
-      focusedBorder:
-          OutlineInputBorder(
-        borderRadius:
-            BorderRadius.circular(
-          9,
-        ),
-
-        borderSide:
-            const BorderSide(
-          color:
-              Color(
-            0xffB388FF,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showError(
-    String message,
-  ) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
       SnackBar(
-        content:
-            Text(
+        content: Text(
           message,
-
           style:
               GoogleFonts.jetBrainsMono(
             fontSize: 12,
           ),
         ),
-
         backgroundColor:
-            const Color(
-          0xff2A1A20,
-        ),
+            const Color(0xff2A1A20),
       ),
     );
   }

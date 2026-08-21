@@ -1,3 +1,8 @@
+import 'package:devtrack/features/notes/widgets/delete_note_dialog.dart';
+import 'package:devtrack/features/notes/widgets/note_content_view.dart';
+import 'package:devtrack/features/notes/widgets/note_details_header.dart';
+import 'package:devtrack/features/notes/widgets/note_edit_field.dart';
+import 'package:devtrack/features/notes/widgets/note_section_label.dart';
 import 'package:devtrack/shared/models/note_request.dart';
 import 'package:devtrack/shared/models/note_response.dart';
 import 'package:devtrack/shared/providers/note_provider.dart';
@@ -81,47 +86,7 @@ class _NoteDetailsScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xff1A1A1E),
-          title: Text(
-            "DELETE NOTE?",
-            style: GoogleFonts.pressStart2p(
-              color: const Color(0xffFF8BA7),
-              fontSize: 14,
-            ),
-          ),
-          content: Text(
-            "This action cannot be undone.",
-            style: GoogleFonts.jetBrainsMono(
-              color: Colors.white54,
-              fontSize: 12,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-              child: Text(
-                "CANCEL",
-                style: GoogleFonts.jetBrainsMono(
-                  color: Colors.white54,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
-              child: Text(
-                "DELETE",
-                style: GoogleFonts.jetBrainsMono(
-                  color: const Color(0xffFF8BA7),
-                ),
-              ),
-            ),
-          ],
-        );
+        return const DeleteNoteDialog();
       },
     );
 
@@ -157,6 +122,12 @@ class _NoteDetailsScreenState
     );
   }
 
+  void _toggleEditing() {
+    setState(() {
+      _editing = !_editing;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -187,11 +158,7 @@ class _NoteDetailsScreenState
 
           actions: [
             IconButton(
-              onPressed: () {
-                setState(() {
-                  _editing = !_editing;
-                });
-              },
+              onPressed: _toggleEditing,
               icon: Icon(
                 _editing
                     ? Icons.close
@@ -212,99 +179,27 @@ class _NoteDetailsScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-                children: [
-                  Hero(
-                    tag: 'note-icon-${widget.note.id}',
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Container(
-                        width: 68,
-                        height: 68,
-                        decoration: BoxDecoration(
-                          color: const Color(0xffF3C86A)
-                              .withOpacity(0.08),
-                          borderRadius:
-                              BorderRadius.circular(15),
-                          border: Border.all(
-                            color: const Color(0xffF3C86A)
-                                .withOpacity(0.2),
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.sticky_note_2_outlined,
-                          color: Color(0xffF3C86A),
-                          size: 35,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(width: 17),
-
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        top: 5,
-                      ),
-                      child: _editing
-                          ? _buildTextField(
-                              _titleController,
-                              "Note title",
-                            )
-                          : Hero(
-                              tag:
-                                  'note-title-${widget.note.id}',
-                              child: Material(
-                                color: Colors.transparent,
-                                child: Text(
-                                  widget.note.title,
-                                  style:
-                                      GoogleFonts.pressStart2p(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
+              NoteDetailsHeader(
+                noteId: widget.note.id,
+                title: widget.note.title,
+                editing: _editing,
+                controller: _titleController,
               ),
 
               const SizedBox(height: 28),
 
-              _sectionLabel("CONTENT"),
+              const NoteSectionLabel("CONTENT"),
 
               const SizedBox(height: 12),
 
               _editing
-                  ? _buildTextField(
-                      _contentController,
-                      "Note content",
+                  ? NoteEditField(
+                      controller: _contentController,
+                      hint: "Note content",
                       maxLines: 18,
                     )
-                  : Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: const Color(0xff1A1A1E),
-                        borderRadius:
-                            BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.white10,
-                        ),
-                      ),
-                      child: Text(
-                        widget.note.content,
-                        style: GoogleFonts.jetBrainsMono(
-                          color: Colors.white70,
-                          fontSize: 13,
-                          height: 1.65,
-                        ),
-                      ),
+                  : NoteContentView(
+                      content: widget.note.content,
                     ),
 
               if (_editing) ...[
@@ -371,61 +266,6 @@ class _NoteDetailsScreenState
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _sectionLabel(String text) {
-    return Text(
-      text,
-      style: GoogleFonts.jetBrainsMono(
-        color: const Color(0xffF3C86A),
-        fontSize: 11,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-    TextEditingController controller,
-    String hint, {
-    int maxLines = 1,
-  }) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      style: GoogleFonts.jetBrainsMono(
-        color: Colors.white,
-        fontSize: 13,
-      ),
-      cursorColor: const Color(0xffF3C86A),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: GoogleFonts.jetBrainsMono(
-          color: Colors.white24,
-          fontSize: 12,
-        ),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.05),
-        contentPadding: const EdgeInsets.all(15),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Colors.white10,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Colors.white10,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Color(0xffF3C86A),
           ),
         ),
       ),

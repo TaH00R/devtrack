@@ -1,4 +1,6 @@
 import 'package:devtrack/features/auth/providers/auth_provider.dart';
+import 'package:devtrack/features/notes/widgets/note_form_label.dart';
+import 'package:devtrack/features/notes/widgets/note_text_field.dart';
 import 'package:devtrack/shared/models/note_request.dart';
 import 'package:devtrack/shared/providers/note_provider.dart';
 import 'package:flutter/material.dart';
@@ -78,7 +80,6 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: const Color(0xff121214),
-
         appBar: AppBar(
           backgroundColor: const Color(0xff121214),
           elevation: 0,
@@ -99,7 +100,6 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
             ),
           ),
         ),
-
         body: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
             22,
@@ -122,16 +122,15 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
 
                 const SizedBox(height: 28),
 
-                _buildLabel("NOTE TITLE"),
+                const NoteFormLabel("NOTE TITLE"),
 
                 const SizedBox(height: 10),
 
-                _buildTextField(
+                NoteTextField(
                   controller: _titleController,
                   hintText: "What are you thinking about?",
                   validator: (value) {
-                    if (value == null ||
-                        value.trim().isEmpty) {
+                    if (value == null || value.trim().isEmpty) {
                       return "Note title is required";
                     }
 
@@ -141,17 +140,16 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
 
                 const SizedBox(height: 24),
 
-                _buildLabel("CONTENT"),
+                const NoteFormLabel("CONTENT"),
 
                 const SizedBox(height: 10),
 
-                _buildTextField(
+                NoteTextField(
                   controller: _contentController,
                   hintText: "Write your note...",
                   maxLines: 14,
                   validator: (value) {
-                    if (value == null ||
-                        value.trim().isEmpty) {
+                    if (value == null || value.trim().isEmpty) {
                       return "Note content is required";
                     }
 
@@ -208,75 +206,6 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: GoogleFonts.jetBrainsMono(
-        color: const Color(0xffF3C86A),
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    String? Function(String?)? validator,
-    int maxLines = 1,
-  }) {
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      maxLines: maxLines,
-      style: GoogleFonts.jetBrainsMono(
-        color: Colors.white,
-        fontSize: 13,
-      ),
-      cursorColor: const Color(0xffF3C86A),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: GoogleFonts.jetBrainsMono(
-          color: Colors.white24,
-          fontSize: 13,
-        ),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.05),
-        contentPadding: const EdgeInsets.all(16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Colors.white10,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Colors.white10,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Color(0xffF3C86A),
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Color(0xffFF8BA7),
-          ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Color(0xffFF8BA7),
           ),
         ),
       ),

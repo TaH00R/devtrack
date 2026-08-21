@@ -2,7 +2,8 @@
 
 > A full-stack developer productivity platform for tracking projects, tasks, goals, notes, and coding profiles, all in one place.
 
-i built ts cz i was supposed to get paid 50/- by a friend...
+i built ts cz i ~was supposed to get paid 50/- by a friend...~ [I paid the 50/- -@R1ftzy]
+
 and yes i love pain, so i used spring boot and postgresql for the backend, and flutter for the frontend.
 and i love pixels, so i made a lot of pixels in the frontend.
 

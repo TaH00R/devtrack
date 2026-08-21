@@ -23,40 +23,24 @@ class LeetcodeCard extends StatelessWidget {
 
     if (leetcode == null) {
       return const EmptyCard(
-        message:
-            '> leetcode profile not connected.',
+        message: '> leetcode profile not connected.',
         icon: Icons.terminal,
         color: Color(0xffFF8BA7),
       );
     }
 
-    final username =
-        leetcode.username?.toString() ??
-        'Unknown';
+    final username = leetcode.username;
+    final totalSolved = leetcode.totalSolved;
+    final easySolved = leetcode.easySolved;
+    final mediumSolved = leetcode.mediumSolved;
+    final hardSolved = leetcode.hardSolved;
+    final contestRating = leetcode.contestRating;
+    final submissions = leetcode.submissions;
 
-    final totalSolved =
-        leetcode.totalSolved ?? 0;
-
-    final easySolved =
-        leetcode.easySolved ?? 0;
-
-    final mediumSolved =
-        leetcode.mediumSolved ?? 0;
-
-    final hardSolved =
-        leetcode.hardSolved ?? 0;
-
-    final totalQuestions =
-        leetcode.totalQuestions ?? 0;
-
-    final easyTotal =
-        leetcode.totalEasy ?? 0;
-
-    final mediumTotal =
-        leetcode.totalMedium ?? 0;
-
-    final hardTotal =
-        leetcode.totalHard ?? 0;
+    final int totalSubmissions = submissions.values.fold<int>(
+  0,
+  (int sum, int value) => sum + value,
+);
 
     return Container(
       width: double.infinity,
@@ -69,45 +53,28 @@ class LeetcodeCard extends StatelessWidget {
         ),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: const Color(0xffFF8BA7)
-                      .withOpacity(.12),
-                  borderRadius:
-                      BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.terminal,
-                  color: Color(0xffFF8BA7),
-                  size: 25,
-                ),
+              _LeetcodeAvatar(
+                avatarUrl: leetcode.avatarUrl,
               ),
 
               const SizedBox(width: 14),
 
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       username,
                       maxLines: 1,
-                      overflow:
-                          TextOverflow.ellipsis,
-                      style:
-                          GoogleFonts.jetBrainsMono(
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.jetBrainsMono(
                         color: Colors.white,
                         fontSize: 13,
-                        fontWeight:
-                            FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
 
@@ -115,10 +82,8 @@ class LeetcodeCard extends StatelessWidget {
 
                     Text(
                       '> leetcode connected',
-                      style:
-                          GoogleFonts.jetBrainsMono(
-                        color:
-                            const Color(0xffFF8BA7),
+                      style: GoogleFonts.jetBrainsMono(
+                        color: const Color(0xffFF8BA7),
                         fontSize: 10,
                       ),
                     ),
@@ -130,11 +95,34 @@ class LeetcodeCard extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          Center(
-            child: _SolvedCircle(
-              solved: totalSolved,
-              total: totalQuestions,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: _MainStat(
+                  label: 'SOLVED',
+                  value: '$totalSolved',
+                  color: const Color(0xffFF8BA7),
+                ),
+              ),
+
+              Expanded(
+                child: _MainStat(
+                  label: 'SUBMISSIONS',
+                  value: '$totalSubmissions',
+                  color: const Color(0xff64D8FF),
+                ),
+              ),
+
+              Expanded(
+                child: _MainStat(
+                  label: 'RATING',
+                  value: contestRating == null
+                      ? '--'
+                      : contestRating.round().toString(),
+                  color: const Color(0xffF3C86A),
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: 24),
@@ -142,26 +130,40 @@ class LeetcodeCard extends StatelessWidget {
           _DifficultyRow(
             label: 'EASY',
             solved: easySolved,
-            total: easyTotal,
             color: const Color(0xff6EE7A2),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
           _DifficultyRow(
             label: 'MEDIUM',
             solved: mediumSolved,
-            total: mediumTotal,
             color: const Color(0xffF3C86A),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
           _DifficultyRow(
             label: 'HARD',
             solved: hardSolved,
-            total: hardTotal,
             color: const Color(0xffFF8BA7),
+          ),
+
+          const SizedBox(height: 22),
+
+          Text(
+            'SUBMISSION ACTIVITY',
+            style: GoogleFonts.jetBrainsMono(
+              color: Colors.white38,
+              fontSize: 10,
+              letterSpacing: 1,
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          _SubmissionGraph(
+            submissions: submissions,
           ),
         ],
       ),
@@ -169,67 +171,80 @@ class LeetcodeCard extends StatelessWidget {
   }
 }
 
-class _SolvedCircle extends StatelessWidget {
-  final int solved;
-  final int total;
+class _LeetcodeAvatar extends StatelessWidget {
+  final String? avatarUrl;
 
-  const _SolvedCircle({
-    required this.solved,
-    required this.total,
+  const _LeetcodeAvatar({
+    required this.avatarUrl,
   });
 
   @override
   Widget build(BuildContext context) {
-    final progress =
-        total == 0 ? 0.0 : solved / total;
-
-    return SizedBox(
-      width: 140,
-      height: 140,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            width: 140,
-            height: 140,
-            child: CircularProgressIndicator(
-              value: progress.clamp(0.0, 1.0),
-              strokeWidth: 9,
-              backgroundColor:
-                  Colors.white10,
-              valueColor:
-                  const AlwaysStoppedAnimation(
-                Color(0xffFF8BA7),
-              ),
-            ),
-          ),
-
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '$solved',
-                style:
-                    GoogleFonts.pressStart2p(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-              ),
-
-              const SizedBox(height: 9),
-
-              Text(
-                'SOLVED',
-                style:
-                    GoogleFonts.jetBrainsMono(
-                  color: Colors.white38,
-                  fontSize: 10,
-                ),
-              ),
-            ],
-          ),
-        ],
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: const Color(0xffFF8BA7).withOpacity(.12),
+        borderRadius: BorderRadius.circular(12),
       ),
+      clipBehavior: Clip.antiAlias,
+      child: avatarUrl == null || avatarUrl!.isEmpty
+          ? const Icon(
+              Icons.terminal,
+              color: Color(0xffFF8BA7),
+              size: 24,
+            )
+          : Image.network(
+              avatarUrl!,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) {
+                return const Icon(
+                  Icons.terminal,
+                  color: Color(0xffFF8BA7),
+                  size: 24,
+                );
+              },
+            ),
+    );
+  }
+}
+
+class _MainStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _MainStat({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.pressStart2p(
+            color: color,
+            fontSize: 11,
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.jetBrainsMono(
+            color: Colors.white38,
+            fontSize: 8,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -237,75 +252,195 @@ class _SolvedCircle extends StatelessWidget {
 class _DifficultyRow extends StatelessWidget {
   final String label;
   final int solved;
-  final int total;
   final Color color;
 
   const _DifficultyRow({
     required this.label,
     required this.solved,
-    required this.total,
     required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    final progress =
-        total == 0 ? 0.0 : solved / total;
-
-    return Column(
-      children: [
-        Row(
-          children: [
-            SizedBox(
-              width: 62,
-              child: Text(
-                label,
-                style:
-                    GoogleFonts.jetBrainsMono(
-                  color: color,
-                  fontSize: 10,
-                  fontWeight:
-                      FontWeight.bold,
-                ),
-              ),
-            ),
-
-            Expanded(
-              child: ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(10),
-                child:
-                    LinearProgressIndicator(
-                  value:
-                      progress.clamp(0.0, 1.0),
-                  minHeight: 7,
-                  backgroundColor:
-                      Colors.white10,
-                  valueColor:
-                      AlwaysStoppedAnimation(
-                    color,
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(width: 12),
-
-            SizedBox(
-              width: 48,
-              child: Text(
-                '$solved',
-                textAlign: TextAlign.right,
-                style:
-                    GoogleFonts.jetBrainsMono(
-                  color: Colors.white70,
-                  fontSize: 11,
-                ),
-              ),
-            ),
-          ],
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 12,
+      ),
+      decoration: BoxDecoration(
+        color: color.withOpacity(.06),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: color.withOpacity(.18),
         ),
-      ],
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 70,
+            child: Text(
+              label,
+              style: GoogleFonts.jetBrainsMono(
+                color: color,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          Expanded(
+            child: Text(
+              '$solved problems solved',
+              style: GoogleFonts.jetBrainsMono(
+                color: Colors.white54,
+                fontSize: 10,
+              ),
+            ),
+          ),
+
+          Text(
+            '$solved',
+            style: GoogleFonts.pressStart2p(
+              color: color,
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
     );
+  }
+}
+
+class _SubmissionGraph extends StatelessWidget {
+  final Map<DateTime, int> submissions;
+
+  const _SubmissionGraph({
+    required this.submissions,
+  });
+
+  static const int columns = 24;
+  static const int rows = 6;
+
+  @override
+  Widget build(BuildContext context) {
+    final today = DateTime.now();
+
+    final normalizedToday = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    );
+
+    final startDate = normalizedToday.subtract(
+      const Duration(days: columns * rows - 1),
+    );
+
+    final int maxSubmissions = submissions.values.isEmpty
+        ? 0
+        : submissions.values.reduce(
+            (int a, int b) => a > b ? a : b,
+          );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 5.0;
+
+        final cellSize =
+            (constraints.maxWidth -
+                    ((columns - 1) * spacing)) /
+                columns;
+
+        return Column(
+          children: List.generate(rows, (row) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: row == rows - 1 ? 0 : spacing,
+              ),
+              child: Row(
+                children: List.generate(columns, (column) {
+                  // Fill vertically like the screenshot.
+                  final dayIndex =
+                      column * rows + row;
+
+                  final date = startDate.add(
+                    Duration(days: dayIndex),
+                  );
+
+                  final value = _getSubmissions(date);
+
+                  return Container(
+                    width: cellSize,
+                    height: cellSize,
+                    margin: EdgeInsets.only(
+                      right: column == columns - 1
+                          ? 0
+                          : spacing,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _getColor(
+                        value,
+                        maxSubmissions,
+                      ),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  );
+                }),
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
+
+  int _getSubmissions(DateTime date) {
+    final normalizedDate = DateTime(
+      date.year,
+      date.month,
+      date.day,
+    );
+
+    for (final entry in submissions.entries) {
+      final entryDate = DateTime(
+        entry.key.year,
+        entry.key.month,
+        entry.key.day,
+      );
+
+      if (entryDate == normalizedDate) {
+        return entry.value;
+      }
+    }
+
+    return 0;
+  }
+
+  Color _getColor(
+    int value,
+    int maxSubmissions,
+  ) {
+    if (value == 0) {
+      return const Color(0xff2B2C33);
+    }
+
+    if (maxSubmissions == 0) {
+      return const Color(0xffF47A98);
+    }
+
+    final ratio = value / maxSubmissions;
+
+    if (ratio <= 0.25) {
+      return const Color(0xff663946);
+    }
+
+    if (ratio <= 0.5) {
+      return const Color(0xff9E4F63);
+    }
+
+    if (ratio <= 0.75) {
+      return const Color(0xffD66380);
+    }
+
+    return const Color(0xffFF91AA);
   }
 }

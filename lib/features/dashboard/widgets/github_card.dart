@@ -29,27 +29,16 @@ class GithubCard extends StatelessWidget {
       );
     }
 
-    final username =
-        github.username?.toString() ??
-        github.login?.toString() ??
-        'Unknown';
+    final username = github.username;
+    final publicRepos = github.publicRepos;
+    final followers = github.followers;
+    final avatarUrl = github.avatarUrl;
+    final contributions = github.contributions;
 
-    final publicRepos =
-        github.publicRepos ?? 0;
-
-    final followers =
-        github.followers ?? 0;
-
-    final following =
-        github.following ?? 0;
-
-    final avatarUrl =
-        github.avatarUrl?.toString();
-
-    final contributions =
-        github.contributions ??
-        github.totalContributions ??
-        0;
+    final int totalContributions = contributions.values.fold<int>(
+  0,
+  (int sum, int value) => sum + value,
+);
 
     return Container(
       width: double.infinity,
@@ -62,8 +51,7 @@ class GithubCard extends StatelessWidget {
         ),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -75,20 +63,16 @@ class GithubCard extends StatelessWidget {
 
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       username,
                       maxLines: 1,
-                      overflow:
-                          TextOverflow.ellipsis,
-                      style:
-                          GoogleFonts.jetBrainsMono(
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.jetBrainsMono(
                         color: Colors.white,
                         fontSize: 13,
-                        fontWeight:
-                            FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
 
@@ -96,21 +80,13 @@ class GithubCard extends StatelessWidget {
 
                     Text(
                       '> github connected',
-                      style:
-                          GoogleFonts.jetBrainsMono(
-                        color:
-                            const Color(0xffB388FF),
+                      style: GoogleFonts.jetBrainsMono(
+                        color: const Color(0xffB388FF),
                         fontSize: 10,
                       ),
                     ),
                   ],
                 ),
-              ),
-
-              const Icon(
-                Icons.open_in_new,
-                color: Colors.white24,
-                size: 18,
               ),
             ],
           ),
@@ -124,14 +100,16 @@ class GithubCard extends StatelessWidget {
                 value: '$publicRepos',
                 color: const Color(0xffB388FF),
               ),
+
               _GithubStat(
                 label: 'FOLLOWERS',
                 value: '$followers',
                 color: const Color(0xff6EE7A2),
               ),
+
               _GithubStat(
-                label: 'FOLLOWING',
-                value: '$following',
+                label: 'CONTRIBS',
+                value: '$totalContributions',
                 color: const Color(0xff64D8FF),
               ),
             ],
@@ -139,58 +117,8 @@ class GithubCard extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(
-                0.025,
-              ),
-              borderRadius:
-                  BorderRadius.circular(10),
-              border: Border.all(
-                color: Colors.white10,
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.local_fire_department_outlined,
-                  color: Color(0xffFF8BA7),
-                  size: 20,
-                ),
-
-                const SizedBox(width: 10),
-
-                Text(
-                  '$contributions',
-                  style:
-                      GoogleFonts.pressStart2p(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-
-                const SizedBox(width: 9),
-
-                Expanded(
-                  child: Text(
-                    'CONTRIBUTIONS',
-                    style:
-                        GoogleFonts.jetBrainsMono(
-                      color: Colors.white38,
-                      fontSize: 10,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
           Text(
-            'ACTIVITY',
+            'CONTRIBUTION ACTIVITY',
             style: GoogleFonts.jetBrainsMono(
               color: Colors.white38,
               fontSize: 10,
@@ -200,7 +128,9 @@ class GithubCard extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          const _ContributionGraph(),
+          _ContributionGraph(
+            contributions: contributions,
+          ),
         ],
       ),
     );
@@ -208,7 +138,7 @@ class GithubCard extends StatelessWidget {
 }
 
 class _GithubAvatar extends StatelessWidget {
-  final String? avatarUrl;
+  final String avatarUrl;
 
   const _GithubAvatar({
     required this.avatarUrl,
@@ -220,23 +150,19 @@ class _GithubAvatar extends StatelessWidget {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        borderRadius:
-            BorderRadius.circular(12),
-        color: const Color(0xffB388FF)
-            .withOpacity(.12),
+        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xffB388FF).withOpacity(.12),
       ),
       clipBehavior: Clip.antiAlias,
-      child: avatarUrl == null ||
-              avatarUrl!.isEmpty
+      child: avatarUrl.isEmpty
           ? const Icon(
               Icons.person,
               color: Color(0xffB388FF),
             )
           : Image.network(
-              avatarUrl!,
+              avatarUrl,
               fit: BoxFit.cover,
-              errorBuilder:
-                  (_, __, ___) {
+              errorBuilder: (_, __, ___) {
                 return const Icon(
                   Icons.person,
                   color: Color(0xffB388FF),
@@ -265,10 +191,9 @@ class _GithubStat extends StatelessWidget {
         children: [
           Text(
             value,
-            style:
-                GoogleFonts.pressStart2p(
+            style: GoogleFonts.pressStart2p(
               color: color,
-              fontSize: 14,
+              fontSize: 12,
             ),
           ),
 
@@ -277,8 +202,7 @@ class _GithubStat extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style:
-                GoogleFonts.jetBrainsMono(
+            style: GoogleFonts.jetBrainsMono(
               color: Colors.white38,
               fontSize: 8,
             ),
@@ -289,17 +213,43 @@ class _GithubStat extends StatelessWidget {
   }
 }
 
-class _ContributionGraph
-    extends StatelessWidget {
-  const _ContributionGraph();
+class _ContributionGraph extends StatelessWidget {
+  final Map<DateTime, int> contributions;
+
+  const _ContributionGraph({
+    required this.contributions,
+  });
+
+  static const int columns = 24;
+  static const int rows = 6;
 
   @override
   Widget build(BuildContext context) {
+    final today = DateTime.now();
+
+    // Normalize today's date.
+    final normalizedToday = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    );
+
+    // GitHub-style graph:
+    // each column = one week
+    // each row = one day
+    final startDate = normalizedToday.subtract(
+      const Duration(days: columns * rows - 1),
+    );
+
+    final int maxContribution = contributions.values.isEmpty
+        ? 0
+        : contributions.values.reduce(
+            (int a, int b) => a > b ? a : b,
+          );
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        const spacing = 3.0;
-        const columns = 20;
-        const rows = 5;
+        const spacing = 5.0;
 
         final cellSize =
             (constraints.maxWidth -
@@ -310,40 +260,38 @@ class _ContributionGraph
           children: List.generate(rows, (row) {
             return Padding(
               padding: EdgeInsets.only(
-                bottom: row == rows - 1
-                    ? 0
-                    : spacing,
+                bottom: row == rows - 1 ? 0 : spacing,
               ),
               child: Row(
-                children: List.generate(
-                  columns,
-                  (column) {
-                    final value =
-                        (row * columns +
-                            column) %
-                            5;
+                children: List.generate(columns, (column) {
+                  // IMPORTANT:
+                  // Fill vertically first, then move right.
+                  final dayIndex =
+                      column * rows + row;
 
-                    return Container(
-                      width: cellSize,
-                      height: cellSize,
-                      margin:
-                          EdgeInsets.only(
-                        right:
-                            column ==
-                                    columns - 1
-                                ? 0
-                                : spacing,
+                  final date = startDate.add(
+                    Duration(days: dayIndex),
+                  );
+
+                  final value = _getContribution(date);
+
+                  return Container(
+                    width: cellSize,
+                    height: cellSize,
+                    margin: EdgeInsets.only(
+                      right: column == columns - 1
+                          ? 0
+                          : spacing,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _getColor(
+                        value,
+                        maxContribution,
                       ),
-                      decoration: BoxDecoration(
-                        color: _getColor(value),
-                        borderRadius:
-                            BorderRadius.circular(
-                          2,
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  );
+                }),
               ),
             );
           }),
@@ -352,23 +300,55 @@ class _ContributionGraph
     );
   }
 
-  Color _getColor(int value) {
-    switch (value) {
-      case 0:
-        return Colors.white.withOpacity(
-          0.04,
-        );
-      case 1:
-        return const Color(0xffB388FF)
-            .withOpacity(.2);
-      case 2:
-        return const Color(0xffB388FF)
-            .withOpacity(.4);
-      case 3:
-        return const Color(0xffB388FF)
-            .withOpacity(.65);
-      default:
-        return const Color(0xffB388FF);
+  int _getContribution(DateTime date) {
+    final normalizedDate = DateTime(
+      date.year,
+      date.month,
+      date.day,
+    );
+
+    for (final entry in contributions.entries) {
+      final entryDate = DateTime(
+        entry.key.year,
+        entry.key.month,
+        entry.key.day,
+      );
+
+      if (entryDate == normalizedDate) {
+        return entry.value;
+      }
     }
+
+    return 0;
+  }
+
+  Color _getColor(
+    int value,
+    int maxContribution,
+  ) {
+    // Empty
+    if (value == 0) {
+      return const Color(0xff2B2C33);
+    }
+
+    if (maxContribution == 0) {
+      return const Color(0xff6EE7A2);
+    }
+
+    final ratio = value / maxContribution;
+
+    if (ratio <= 0.25) {
+      return const Color(0xff315849);
+    }
+
+    if (ratio <= 0.5) {
+      return const Color(0xff438065);
+    }
+
+    if (ratio <= 0.75) {
+      return const Color(0xff5EBE89);
+    }
+
+    return const Color(0xff7BE6A8);
   }
 }

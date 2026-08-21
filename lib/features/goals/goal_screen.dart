@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import 'widgets/deadline_selector.dart';
+import 'widgets/goal_label.dart';
+import 'widgets/goal_text_field.dart';
+
 class GoalScreen extends StatefulWidget {
   const GoalScreen({super.key});
 
@@ -124,6 +128,12 @@ class _GoalScreenState extends State<GoalScreen> {
     );
   }
 
+  String _formatDate(DateTime date) {
+    return "${date.day.toString().padLeft(2, '0')}/"
+        "${date.month.toString().padLeft(2, '0')}/"
+        "${date.year}";
+  }
+
   @override
   Widget build(BuildContext context) {
     final goalProvider = context.watch<GoalProvider>();
@@ -159,11 +169,11 @@ class _GoalScreenState extends State<GoalScreen> {
 
                 const SizedBox(height: 28),
 
-                _buildLabel("GOAL TITLE"),
+                const GoalLabel("GOAL TITLE"),
 
                 const SizedBox(height: 10),
 
-                _buildTextField(
+                GoalTextField(
                   controller: _titleController,
                   hintText: "What do you want to achieve?",
                   validator: (value) {
@@ -177,11 +187,11 @@ class _GoalScreenState extends State<GoalScreen> {
 
                 const SizedBox(height: 24),
 
-                _buildLabel("DESCRIPTION"),
+                const GoalLabel("DESCRIPTION"),
 
                 const SizedBox(height: 10),
 
-                _buildTextField(
+                GoalTextField(
                   controller: _descriptionController,
                   hintText: "Describe your goal...",
                   maxLines: 5,
@@ -189,56 +199,14 @@ class _GoalScreenState extends State<GoalScreen> {
 
                 const SizedBox(height: 24),
 
-                _buildLabel("DEADLINE"),
+                const GoalLabel("DEADLINE"),
 
                 const SizedBox(height: 10),
 
-                GestureDetector(
+                DeadlineSelector(
+                  deadline: _deadline,
                   onTap: _selectDeadline,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 17,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: Colors.white10,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.calendar_today_outlined,
-                          color: Color(0xffF3C86A),
-                          size: 20,
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        Expanded(
-                          child: Text(
-                            _deadline == null
-                                ? "Select a deadline"
-                                : _formatDate(_deadline!),
-                            style: GoogleFonts.jetBrainsMono(
-                              color: _deadline == null
-                                  ? Colors.white38
-                                  : Colors.white70,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-
-                        const Icon(
-                          Icons.chevron_right,
-                          color: Colors.white38,
-                        ),
-                      ],
-                    ),
-                  ),
+                  formatDate: _formatDate,
                 ),
 
                 const SizedBox(height: 36),
@@ -298,80 +266,5 @@ class _GoalScreenState extends State<GoalScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: GoogleFonts.jetBrainsMono(
-        color: const Color(0xffF3C86A),
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    String? Function(String?)? validator,
-    int maxLines = 1,
-  }) {
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      maxLines: maxLines,
-      style: GoogleFonts.jetBrainsMono(
-        color: Colors.white,
-        fontSize: 13,
-      ),
-      cursorColor: const Color(0xffB388FF),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: GoogleFonts.jetBrainsMono(
-          color: Colors.white24,
-          fontSize: 13,
-        ),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.05),
-        contentPadding: const EdgeInsets.all(16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Colors.white10,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Colors.white10,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Color(0xffB388FF),
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Color(0xffFF8BA7),
-          ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: Color(0xffFF8BA7),
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return "${date.day.toString().padLeft(2, '0')}/"
-        "${date.month.toString().padLeft(2, '0')}/"
-        "${date.year}";
   }
 }
